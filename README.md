@@ -1,5 +1,7 @@
 # @hatish/hati
 
+Hati is meant to work in trusted networks - where all nodes operators know each other and can be trusted.
+
 By default all connections are secured with TLS certificates and clients connecting to the server are required to have their connection secured with TLS certificate as well.
 
 Hati during each startup will generate new certificate and will keep it in-memory.
