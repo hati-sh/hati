@@ -1,5 +1,7 @@
 package core
 
+import "io"
+
 // Message
 type Message struct {
 	payload    []byte
@@ -10,8 +12,13 @@ func NewMessage() Message {
 	return Message{}
 }
 
+func ParseBytesToMessage(in io.ByteReader, out *Message) {
+
+}
+
 func (m *Message) Bytes() []byte {
-	msgBytes := append(MESSAGE_HEADER[:], m.payload...)
+	msgBytes := append(MESSAGE_HEADER[:], VERSION[:]...)
+	msgBytes = append(msgBytes, m.payload...)
 	msgBytes = append(msgBytes, MESSAGE_EOF[:]...)
 	msgBytes = append(msgBytes, m.extraSpace[:]...)
 

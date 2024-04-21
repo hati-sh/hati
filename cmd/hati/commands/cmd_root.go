@@ -14,7 +14,7 @@ func init() {
 }
 
 func Execute() {
-	rootCmd.AddCommand(cmdStart)
+	rootCmd.AddCommand(cmdStart, cmdClient)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

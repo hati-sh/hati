@@ -13,6 +13,12 @@ dev:
 	@echo "\n> --- run in development mode --"
 	HATI_DEBUG=true HATI_DATA_DIR=./build go run ./cmd/hati/main.go start
 
+.PHONY: dev-client
+dev-client:
+	@echo "\n> --- run in development mode --"
+	HATI_DEBUG=true HATI_DATA_DIR=./build go run ./cmd/hati/main.go client localhost:4242
+
+
 .PHONY: hati
 hati:
 	mkdir -p $(GOBIN)

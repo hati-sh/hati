@@ -1,9 +1,9 @@
 package core
 
-type Cmd string
+type Cmd []byte
 
-const CMD_SET Cmd = "SET"
-const CMD_GET Cmd = "GET"
+var CMD_SET Cmd = []byte("SET")
+var CMD_GET Cmd = []byte("GET")
 
 type Command struct {
 	Cmd   Cmd
