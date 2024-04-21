@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/hati-sh/hati/core"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,19 @@ var cmdStart = &cobra.Command{
 	Long:  `start is for starting application.`,
 	// Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+
+		hati := core.NewHati()
+		if err := hati.Start(); err != nil {
+			panic(err)
+		}
+
+		msg := core.NewMessage()
+		msg.SetPayload([]byte("hello"))
+
+		fmt.Println(msg.Bytes())
+		fmt.Println(len(msg.Bytes()))
+		fmt.Println(string(msg.Bytes()))
+
 		fmt.Println("hati " + VERSION)
 
 		var osSignal chan os.Signal = make(chan os.Signal, 1)
@@ -29,7 +43,7 @@ var cmdStart = &cobra.Command{
 			for {
 				select {
 				case <-timer.C:
-					fmt.Println("jest")
+					// fmt.Println("jest")
 				}
 			}
 		}()
