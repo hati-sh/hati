@@ -15,9 +15,10 @@ type ClientTcp struct {
 	tlsCertificate tls.Certificate
 	host           string
 	port           string
+	tlsEnabled     bool
 }
 
-func NewClientTcp(host string, port string) (ClientTcp, error) {
+func NewClientTcp(host string, port string, tlsEnabled bool) (ClientTcp, error) {
 	cert, err := common.GenX509KeyPair()
 	if err != nil {
 		return ClientTcp{}, err
@@ -27,6 +28,7 @@ func NewClientTcp(host string, port string) (ClientTcp, error) {
 		tlsCertificate: cert,
 		host:           host,
 		port:           port,
+		tlsEnabled:     tlsEnabled,
 	}, nil
 }
 
@@ -34,10 +36,7 @@ func (s ClientTcp) Connect() error {
 	config := tls.Config{InsecureSkipVerify: true, Certificates: []tls.Certificate{s.tlsCertificate}}
 	config.Rand = rand.Reader
 
-	// conn, err := tls.Dial("tcp", "roundhouse.proxy.rlwy.net:52046", &config)
-	// conn, err := tls.Dial("tcp", "localhost:4242", &config)
-	conn, err := net.Dial("tcp", "roundhouse.proxy.rlwy.net:52046")
-	// conn, err := net.Dial("tcp", "localhost:4242")
+	conn, err := net.Dial("tcp", s.host+":"+s.port)
 	if err != nil {
 		log.Fatalf("client: dial: %s", err)
 	}
