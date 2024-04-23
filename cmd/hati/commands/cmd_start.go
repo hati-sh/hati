@@ -19,8 +19,26 @@ var cmdStart = &cobra.Command{
 	Long:  `start is for starting application.`,
 	// Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		host, _ := cmd.Flags().GetString("host")
+		port, _ := cmd.Flags().GetString("port")
+		tlsFlag, _ := cmd.Flags().GetString("tls")
 
-		hati := core.NewHati()
+		tlsEnabled := false
+
+		if tlsFlag == "on" {
+			tlsEnabled = true
+		}
+
+		config := &core.Config{
+			ServerTcp: &core.ServerTcpConfig{
+				Host:       host,
+				Port:       port,
+				TlsEnabled: tlsEnabled,
+			},
+		}
+
+		hati := core.NewHati(config)
+
 		if err := hati.Start(); err != nil {
 			panic(err)
 		}

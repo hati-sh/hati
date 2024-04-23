@@ -10,6 +10,17 @@ Hati during each startup will generate new certificate and will keep it in-memor
 
 You can turn off TLS by providing `--tls off` flag during startup.
 
+```
+Usage:
+  hati [command]
+
+Available Commands:
+  client      Connect as a client to hati server
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  start       start hati
+```
+
 ## CLI
 
 Start server

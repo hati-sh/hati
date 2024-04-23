@@ -11,7 +11,7 @@ build:
 .PHONY: dev
 dev:
 	@echo "\n> --- run in development mode --"
-	HATI_DEBUG=true HATI_DATA_DIR=./build go run ./cmd/hati/main.go start
+	HATI_DEBUG=true HATI_DATA_DIR=./build go run ./cmd/hati/main.go start --host localhost --port 4242 --tls off
 
 .PHONY: dev-client
 dev-client:

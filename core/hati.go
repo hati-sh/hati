@@ -1,13 +1,17 @@
 package core
 
-type Hati struct{}
+type Hati struct {
+	config *Config
+}
 
-func NewHati() Hati {
-	return Hati{}
+func NewHati(config *Config) Hati {
+	return Hati{
+		config: config,
+	}
 }
 
 func (h *Hati) Start() error {
-	serverTcp, err := NewServerTcp("0.0.0.0", "4242")
+	serverTcp, err := NewServerTcp(h.config.ServerTcp.Host, h.config.ServerTcp.Port)
 	if err != nil {
 		return err
 	}
