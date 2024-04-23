@@ -36,7 +36,8 @@ func (s ClientTcp) Connect() error {
 
 	// conn, err := tls.Dial("tcp", "roundhouse.proxy.rlwy.net:52046", &config)
 	// conn, err := tls.Dial("tcp", "localhost:4242", &config)
-	conn, err := net.Dial("tcp", "localhost:4242")
+	conn, err := net.Dial("tcp", "roundhouse.proxy.rlwy.net:52046")
+	// conn, err := net.Dial("tcp", "localhost:4242")
 	if err != nil {
 		log.Fatalf("client: dial: %s", err)
 	}
