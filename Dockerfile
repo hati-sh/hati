@@ -7,8 +7,11 @@ WORKDIR /hati
 
 COPY . .
 
+COPY entrypoint.sh /app/entrypoint.sh
+
 RUN make build
 
 EXPOSE 4242
 
-CMD ["/hati/build/bin/hati"]
+# CMD ["/hati/build/bin/hati"]
+ENTRYPOINT ["/hati/entrypoint.sh"]
