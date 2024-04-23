@@ -1,11 +1,11 @@
 package core
 
 import (
+	"bufio"
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io"
 	"log"
 
 	"github.com/hati-sh/hati/common"
@@ -49,12 +49,24 @@ func (s ClientTcp) Connect() error {
 	log.Println("client: handshake: ", state.HandshakeComplete)
 	log.Println("client: mutual: ", state.NegotiatedProtocolIsMutual)
 
-	message := "Hello\n"
-	n, err := io.WriteString(conn, message)
+	msg := NewMessage()
+	msg.SetPayload([]byte("dziala!!!"))
+	msg.SetExtraSpace([4]byte{'D'})
+
+	msgBytes := msg.Bytes()
+
+	fmt.Println(msgBytes)
+	fmt.Println(string(msgBytes))
+
+	writer := bufio.NewWriter(conn)
+
+	n, err := writer.Write(msgBytes)
 	if err != nil {
 		log.Fatalf("client: write: %s", err)
 	}
-	log.Printf("client: wrote %q (%d bytes)", message, n)
+	writer.Flush()
+
+	log.Printf("client: wrote %q (%d bytes)", string(msgBytes), n)
 
 	reply := make([]byte, 256)
 	n, err = conn.Read(reply)

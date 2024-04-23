@@ -1,9 +1,9 @@
 package core
 
 import (
-	"bufio"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -84,14 +84,44 @@ func (s ServerTcp) Start() error {
 }
 
 func (client *Client) handleRequest() {
-	reader := bufio.NewReader(client.conn)
+	// reader := bufio.NewReader(client.conn)
+
+	buf := make([]byte, 0, 4096)
+	tmp := make([]byte, 1024)
+
 	for {
-		message, err := reader.ReadString('\n')
+		n, err := client.conn.Read(tmp)
+
+		if err != nil {
+			if err != io.EOF {
+				fmt.Println("read error:", err)
+
+				client.conn.Close()
+				return
+			}
+			fmt.Println(err)
+			break
+		}
+		//fmt.Println("got", n, "bytes.")
+		buf = append(buf, tmp[:n]...)
+
+		// message, err := reader.Read('\n')
 		if err != nil {
 			client.conn.Close()
 			return
 		}
-		fmt.Printf("Message incoming: %s", string(message))
+		fmt.Printf("Message incoming: %s", string(buf))
+
+		receivedMessage, errParse := ParseBytesToMessage(buf)
+		if err != nil {
+			client.conn.Write([]byte(errParse.Error()))
+			client.conn.Close()
+			return
+		}
+
 		client.conn.Write([]byte("Message received.\n"))
+		fmt.Println(receivedMessage)
+		///
+		// receivedMessage, err := ParseBytesToMessage(buf)
 	}
 }
