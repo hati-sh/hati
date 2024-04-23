@@ -60,16 +60,18 @@ func (s ServerTcp) Start() error {
 	}
 	config.Certificates[0] = s.tlsCertificate
 
-	tlsListener := tls.NewListener(tcpKeepAliveListener{listener.(*net.TCPListener)}, config)
+	// tlsListener := tls.NewListener(tcpKeepAliveListener{listener.(*net.TCPListener)}, config)
 
 	defer listener.Close()
-	defer tlsListener.Close()
+	// defer tlsListener.Close()
 
 	fmt.Printf("TCP listening at: %s:%s\n", s.host, s.port)
 	fmt.Printf("TLS: ON\n")
 
 	for {
-		conn, err := tlsListener.Accept()
+		// conn, err := tlsListener.Accept()
+		conn, err := listener.Accept()
+
 		if err != nil {
 			log.Fatal(err)
 		}

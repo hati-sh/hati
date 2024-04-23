@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"crypto/rand"
 	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"log"
+	"net"
 
 	"github.com/hati-sh/hati/common"
 )
@@ -34,20 +34,22 @@ func (s ClientTcp) Connect() error {
 	config := tls.Config{InsecureSkipVerify: true, Certificates: []tls.Certificate{s.tlsCertificate}}
 	config.Rand = rand.Reader
 
-	conn, err := tls.Dial("tcp", "0.0.0.0:4242", &config)
+	// conn, err := tls.Dial("tcp", "roundhouse.proxy.rlwy.net:52046", &config)
+	// conn, err := tls.Dial("tcp", "localhost:4242", &config)
+	conn, err := net.Dial("tcp", "localhost:4242")
 	if err != nil {
 		log.Fatalf("client: dial: %s", err)
 	}
 	defer conn.Close()
 	log.Println("client: connected to: ", conn.RemoteAddr())
 
-	state := conn.ConnectionState()
-	for _, v := range state.PeerCertificates {
-		fmt.Println(x509.MarshalPKIXPublicKey(v.PublicKey))
-		fmt.Println(v.Subject)
-	}
-	log.Println("client: handshake: ", state.HandshakeComplete)
-	log.Println("client: mutual: ", state.NegotiatedProtocolIsMutual)
+	// state := conn.ConnectionState()
+	// for _, v := range state.PeerCertificates {
+	// 	fmt.Println(x509.MarshalPKIXPublicKey(v.PublicKey))
+	// 	fmt.Println(v.Subject)
+	// }
+	// log.Println("client: handshake: ", state.HandshakeComplete)
+	// log.Println("client: mutual: ", state.NegotiatedProtocolIsMutual)
 
 	msg := NewMessage()
 	msg.SetPayload([]byte("dziala!!!"))
