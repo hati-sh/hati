@@ -182,17 +182,17 @@ func (client *Client) processPayloads() {
 	for {
 		<-client.payloads
 
+		lock.Lock()
+		globalCounter++
+		lock.Unlock()
+
 		_, err := client.conn.Write([]byte("+OK\n"))
 		if err != nil {
 			fmt.Println(err)
 			client.conn.Close()
 		}
 
-		lock.Lock()
-		globalCounter++
-		lock.Unlock()
-
-		fmt.Println(globalCounter)
+		// fmt.Println(globalCounter)
 	}
 
 }
