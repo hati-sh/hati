@@ -101,10 +101,10 @@ func (client *Client) handleRequest() {
 	const MAX_BUFFER_SIZE = 1024 * 8
 	const TMP_BUFFER_SIZE = 1024 * 1
 
-	buf := make([]byte, 0, MAX_BUFFER_SIZE)
-	tmp := make([]byte, TMP_BUFFER_SIZE)
-
 	for {
+		buf := make([]byte, 0, MAX_BUFFER_SIZE)
+		tmp := make([]byte, TMP_BUFFER_SIZE)
+
 		n, err := client.conn.Read(tmp)
 
 		if err != nil {
