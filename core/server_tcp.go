@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/hati-sh/hati/common"
@@ -98,12 +99,17 @@ func (s ServerTcp) startListener(listener net.Listener) {
 	}
 }
 
+var globalCounter = 0
+var lock sync.Mutex
+
 func (client *Client) handleRequest() {
 	const MAX_BUFFER_SIZE = 1024 * 8
 	const TMP_BUFFER_SIZE = 1024 * 1
 
+	bufReader := bufio.NewReader(client.conn)
+
 	for {
-		receivedBytes, err := bufio.NewReader(client.conn).ReadBytes('\n')
+		receivedBytes, err := bufReader.ReadBytes('\n')
 
 		if len(receivedBytes) < 1 {
 			client.conn.Close()
@@ -152,11 +158,21 @@ func (client *Client) handleRequest() {
 		// 	return
 		// }
 
-		client.conn.Write([]byte("+OK\n"))
+		_, err = client.conn.Write([]byte("+OK\n"))
+		if err != nil {
+			fmt.Println(err)
+			client.conn.Close()
+		}
+
+		lock.Lock()
+		globalCounter++
+		lock.Unlock()
 
 		client.processPayload(receivedBytes)
 		// receivedMessage, err := ParseBytesToMessage(buf)
 	}
 }
 
-func (client *Client) processPayload(payload []byte) {}
+func (client *Client) processPayload(_ []byte) {
+	fmt.Println(globalCounter)
+}
