@@ -4,22 +4,7 @@ Hati is providing simple distributed key/value store (in-memory and persistent).
 
 Hati is meant to work in trusted networks - where all nodes operators know each other and can be trusted.
 
-By default all connections are secured with TLS certificates and clients connecting to the server are required to have their connection secured with TLS certificate as well.
-
-Hati during each startup will generate new certificate and will keep it in-memory.
-
-You can turn off TLS by providing `--tls off` flag during startup.
-
-```
-Usage:
-  hati [command]
-
-Available Commands:
-  client      Connect as a client to hati server
-  completion  Generate the autocompletion script for the specified shell
-  help        Help about any command
-  start       start hati
-```
+Hati servers which are configured to work in a cluster are connected with each other over P2P protocol.
 
 ## CLI
 
