@@ -157,22 +157,21 @@ func (client *Client) handleRequest() {
 		// 	client.conn.Close()
 		// 	return
 		// }
-
-		_, err = client.conn.Write([]byte("+OK\n"))
-		if err != nil {
-			fmt.Println(err)
-			client.conn.Close()
-		}
-
-		lock.Lock()
-		globalCounter++
-		lock.Unlock()
-
-		client.processPayload(receivedBytes)
+		go client.processPayload(receivedBytes)
 		// receivedMessage, err := ParseBytesToMessage(buf)
 	}
 }
 
-func (client *Client) processPayload(_ []byte) {
+func (client *Client) processPayload(receivedbytes []byte) {
+	_, err := client.conn.Write([]byte("+OK\n"))
+	if err != nil {
+		fmt.Println(err)
+		client.conn.Close()
+	}
+
+	lock.Lock()
+	globalCounter++
+	lock.Unlock()
+
 	fmt.Println(globalCounter)
 }
