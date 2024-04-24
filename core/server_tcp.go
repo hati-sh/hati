@@ -103,7 +103,7 @@ var globalCounter = 0
 var lock sync.Mutex
 
 func (client *Client) handleRequest() {
-	const MAX_BUFFER_SIZE = 1024 * 8
+	const MAX_BUFFER_SIZE = 1024 * 16
 	const TMP_BUFFER_SIZE = 1024 * 1
 
 	bufReader := bufio.NewReader(client.conn)
