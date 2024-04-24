@@ -98,9 +98,8 @@ func (s ServerTcp) startListener(listener net.Listener) {
 }
 
 func (client *Client) handleRequest() {
-	// reader := bufio.NewReader(client.conn)
-	const MAX_BUFFER_SIZE = 1024 * 4
-	const TMP_BUFFER_SIZE = 1024
+	const MAX_BUFFER_SIZE = 1024 * 8
+	const TMP_BUFFER_SIZE = 1024 * 1
 
 	buf := make([]byte, 0, MAX_BUFFER_SIZE)
 	tmp := make([]byte, TMP_BUFFER_SIZE)
@@ -118,23 +117,17 @@ func (client *Client) handleRequest() {
 			fmt.Println(err)
 			break
 		}
-		//fmt.Println("got", n, "bytes.")
 		buf = append(buf, tmp[:n]...)
 
-		// message, err := reader.Read('\n')
-		// fmt.Printf("Message incoming: %s", string(buf))
-
-		receivedMessage, errParse := ParseBytesToMessage(buf)
+		_, errParse := ParseBytesToMessage(buf)
 		if errParse != nil {
 			client.conn.Write([]byte(errParse.Error()))
 			client.conn.Close()
 			return
 		}
 
-		client.conn.Write([]byte("Message received.\n"))
-		fmt.Println(receivedMessage)
-
-		///
+		client.conn.Write([]byte("+OK\n"))
+		// fmt.Println(string(receivedMessage.payload))
 		// receivedMessage, err := ParseBytesToMessage(buf)
 	}
 }

@@ -78,32 +78,19 @@ func ParseBytesToMessage(in []byte) (*Message, error) {
 	eopEndIdx := eopStartIdx + 4
 
 	if bytes.Compare(in[eopStartIdx:eopEndIdx], []byte{'E', 'O', 'P', '\n'}) != 0 {
+		fmt.Println("x <")
+
 		return nil, ErrInvalidPayload
 	}
 
 	if bytes.Compare(in[eopStartIdx:eopEndIdx], []byte{'E', 'O', 'P', '\n'}) != 0 {
+		fmt.Println("y <")
+
 		return nil, ErrInvalidEOF
 	}
 
-	// fmt.Println("payload")
-	// fmt.Println(string(payload))
-	// fmt.Println("eop")
-	// fmt.Println(string(in[eopStartIdx:eopEndIdx]))
-	// // eopStartIdx := firstNewLineIdx + contentLength
-	// // contentEOP := in[eopStartIdx : eopStartIdx+4]
-
-	// fmt.Println(string(receivedHeaderBytes))
-	// fmt.Println(string(extraSpace))
-	// fmt.Println(string(clHeader))
-	// fmt.Println(contentLength)
-
-	// // fmt.Println(string(contentEOP))
-
-	// fmt.Println("receivedHeaderBytes")
-	// fmt.Println(receivedHeaderBytes)
-	// fmt.Println(string(receivedHeaderBytes))
-
 	return &Message{
+		header:     [8]byte(receivedHeaderBytes),
 		payload:    payload,
 		extraSpace: extraSpace,
 	}, nil
