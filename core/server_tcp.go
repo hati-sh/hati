@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
-	"io"
 	"net"
 	"sync"
 	"time"
@@ -94,7 +93,7 @@ func (s ServerTcp) startListener(listener net.Listener) {
 
 		client := &Client{
 			conn:     conn,
-			payloads: make(chan []byte, 2000000),
+			payloads: make(chan []byte, 5000000),
 		}
 
 		go client.handleRequest()
@@ -105,66 +104,77 @@ var globalCounter = 0
 var lock sync.Mutex
 
 func (client *Client) handleRequest() {
-	const MAX_BUFFER_SIZE = 1024 * 16
-	const TMP_BUFFER_SIZE = 1024 * 1
-
 	go client.processPayloads()
 
-	bufReader := bufio.NewReader(client.conn)
-
+	scanner := bufio.NewScanner(client.conn)
 	for {
-		receivedBytes, err := bufReader.ReadBytes('\n')
-
-		if len(receivedBytes) < 1 {
-			client.conn.Close()
-			return
-		}
-
-		if err != nil {
-			if err != io.EOF {
-				fmt.Println("read error:", err)
-
-				client.conn.Close()
-				return
+		if ok := scanner.Scan(); !ok {
+			if err := scanner.Err(); err != nil {
+				fmt.Println(err)
+				break
 			}
-			fmt.Println(err)
+
 			break
 		}
-
-		// payloadBuffer := make([]byte, contentLength)
-		// n, _ := io.ReadFull(client.conn, payloadBuffer)
-
-		// fmt.Println(string(contentLengthBytes))
-		// fmt.Println("=======")
-		// fmt.Println(n)
-		// fmt.Println(payloadBuffer)
-		// fmt.Println(contentLength)
-
-		// fmt.Println(string(receivedContentLengthBytes[0 : len(receivedContentLengthBytes)-1]))
-
-		// payloadBuffer := make([]byte,)
-
-		// cmd := bytes.ToUpper(bytes.TrimSpace(bytes.Split(message, []byte(" "))[0]))
-		// args := bytes.TrimSpace(bytes.TrimPrefix(message, cmd))
-
-		// buffer := make([]byte, 0, 10)
-		// n, _ := io.ReadFull(client.conn, buffer)
-
-		// fmt.Println(n)
-		// fmt.Println(buffer)
-		// receivedMore , _ := bufio.NewReader(client.conn).Read
-		// buf = append(buf, tmp[:n]...)
-
-		// receivedMessage, errParse := ParseBytesToMessage(receivedBytes)
-		// if errParse != nil {
-		// 	client.conn.Write([]byte(errParse.Error()))
-		// 	client.conn.Close()
-		// 	return
-		// }
-		client.payloads <- receivedBytes
-
-		// receivedMessage, err := ParseBytesToMessage(buf)
+		client.payloads <- scanner.Bytes()
+		// scanner.
+		// fmt.Println(scanner.Text())
 	}
+	// bufReader := bufio.NewReader(client.conn)
+	// // bufio.Scanner()
+	// for {
+	// 	receivedBytes, err := bufReader.ReadBytes('\n')
+
+	// 	if len(receivedBytes) < 1 {
+	// 		client.conn.Close()
+	// 		return
+	// 	}
+
+	// 	if err != nil {
+	// 		if err != io.EOF {
+	// 			fmt.Println("read error:", err)
+
+	// 			client.conn.Close()
+	// 			return
+	// 		}
+	// 		fmt.Println(err)
+	// 		break
+	// 	}
+
+	// 	// payloadBuffer := make([]byte, contentLength)
+	// 	// n, _ := io.ReadFull(client.conn, payloadBuffer)
+
+	// 	// fmt.Println(string(contentLengthBytes))
+	// 	// fmt.Println("=======")
+	// 	// fmt.Println(n)
+	// 	// fmt.Println(payloadBuffer)
+	// 	// fmt.Println(contentLength)
+
+	// 	// fmt.Println(string(receivedContentLengthBytes[0 : len(receivedContentLengthBytes)-1]))
+
+	// 	// payloadBuffer := make([]byte,)
+
+	// 	// cmd := bytes.ToUpper(bytes.TrimSpace(bytes.Split(message, []byte(" "))[0]))
+	// 	// args := bytes.TrimSpace(bytes.TrimPrefix(message, cmd))
+
+	// 	// buffer := make([]byte, 0, 10)
+	// 	// n, _ := io.ReadFull(client.conn, buffer)
+
+	// 	// fmt.Println(n)
+	// 	// fmt.Println(buffer)
+	// 	// receivedMore , _ := bufio.NewReader(client.conn).Read
+	// 	// buf = append(buf, tmp[:n]...)
+
+	// 	// receivedMessage, errParse := ParseBytesToMessage(receivedBytes)
+	// 	// if errParse != nil {
+	// 	// 	client.conn.Write([]byte(errParse.Error()))
+	// 	// 	client.conn.Close()
+	// 	// 	return
+	// 	// }
+	// 	client.payloads <- receivedBytes
+
+	// 	// receivedMessage, err := ParseBytesToMessage(buf)
+	// }
 }
 
 func (client *Client) processPayloads() {
