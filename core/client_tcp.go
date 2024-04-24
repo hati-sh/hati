@@ -53,7 +53,7 @@ func (s ClientTcp) Connect() error {
 
 	msg := NewMessage()
 	msg.SetPayload([]byte("dziala!!!"))
-	msg.SetExtraSpace([4]byte{'D'})
+	msg.SetExtraSpace([4]byte{'D', 'U', 'P', 'A'})
 
 	msgBytes := msg.Bytes()
 

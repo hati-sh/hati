@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"time"
 
@@ -33,63 +32,78 @@ type ServerTcp struct {
 	tlsCertificate tls.Certificate
 	host           string
 	port           string
+	tlsEnabled     bool
+	listener       net.Listener
 }
 
-func NewServerTcp(host string, port string) (ServerTcp, error) {
-	cert, err := common.GenX509KeyPair()
-	if err != nil {
-		return ServerTcp{}, err
+func NewServerTcp(host string, port string, tlsEnabled bool) (ServerTcp, error) {
+	var cert tls.Certificate
+	var err error
+
+	if tlsEnabled {
+		cert, err = common.GenX509KeyPair()
+		if err != nil {
+			return ServerTcp{}, err
+		}
 	}
 
 	return ServerTcp{
 		tlsCertificate: cert,
 		host:           host,
 		port:           port,
+		tlsEnabled:     tlsEnabled,
 	}, nil
 }
 
 func (s ServerTcp) Start() error {
+	var err error
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%s", s.host, s.port))
+	s.listener, err = net.Listen("tcp", fmt.Sprintf("%s:%s", s.host, s.port))
 	if err != nil {
 		return err
 	}
 
-	config := &tls.Config{
-		Certificates: make([]tls.Certificate, 1),
-	}
-	config.Certificates[0] = s.tlsCertificate
+	config := &tls.Config{}
 
-	// tlsListener := tls.NewListener(tcpKeepAliveListener{listener.(*net.TCPListener)}, config)
+	if s.tlsEnabled {
+		config.Certificates = make([]tls.Certificate, 1)
+		config.Certificates[0] = s.tlsCertificate
 
-	defer listener.Close()
-	// defer tlsListener.Close()
+		s.listener = tls.NewListener(tcpKeepAliveListener{s.listener.(*net.TCPListener)}, config)
 
-	fmt.Printf("TCP listening at: %s:%s\n", s.host, s.port)
-	fmt.Printf("TLS: ON\n")
-
-	for {
-		// conn, err := tlsListener.Accept()
-		conn, err := listener.Accept()
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		client := &Client{
-			conn: conn,
-		}
-		go client.handleRequest()
+		go s.startListener(s.listener)
+	} else {
+		go s.startListener(s.listener)
 	}
 
 	return nil
 }
 
+func (s ServerTcp) startListener(listener net.Listener) {
+	defer s.listener.Close()
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		client := &Client{
+			conn: conn,
+		}
+
+		go client.handleRequest()
+	}
+}
+
 func (client *Client) handleRequest() {
 	// reader := bufio.NewReader(client.conn)
+	const MAX_BUFFER_SIZE = 1024 * 4
+	const TMP_BUFFER_SIZE = 1024
 
-	buf := make([]byte, 0, 4096)
-	tmp := make([]byte, 1024)
+	buf := make([]byte, 0, MAX_BUFFER_SIZE)
+	tmp := make([]byte, TMP_BUFFER_SIZE)
 
 	for {
 		n, err := client.conn.Read(tmp)
@@ -108,14 +122,10 @@ func (client *Client) handleRequest() {
 		buf = append(buf, tmp[:n]...)
 
 		// message, err := reader.Read('\n')
-		if err != nil {
-			client.conn.Close()
-			return
-		}
-		fmt.Printf("Message incoming: %s", string(buf))
+		// fmt.Printf("Message incoming: %s", string(buf))
 
 		receivedMessage, errParse := ParseBytesToMessage(buf)
-		if err != nil {
+		if errParse != nil {
 			client.conn.Write([]byte(errParse.Error()))
 			client.conn.Close()
 			return
@@ -123,6 +133,7 @@ func (client *Client) handleRequest() {
 
 		client.conn.Write([]byte("Message received.\n"))
 		fmt.Println(receivedMessage)
+
 		///
 		// receivedMessage, err := ParseBytesToMessage(buf)
 	}
