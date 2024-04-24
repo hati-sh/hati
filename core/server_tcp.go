@@ -119,7 +119,7 @@ func (client *Client) handleRequest() {
 		}
 		buf = append(buf, tmp[:n]...)
 
-		_, errParse := ParseBytesToMessage(buf)
+		receivedMessage, errParse := ParseBytesToMessage(buf)
 		if errParse != nil {
 			client.conn.Write([]byte(errParse.Error()))
 			client.conn.Close()
@@ -127,7 +127,7 @@ func (client *Client) handleRequest() {
 		}
 
 		client.conn.Write([]byte("+OK\n"))
-		// fmt.Println(string(receivedMessage.payload))
+		fmt.Println(string(receivedMessage.payload))
 		// receivedMessage, err := ParseBytesToMessage(buf)
 	}
 }
