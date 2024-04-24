@@ -27,7 +27,8 @@ func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
 }
 
 type Client struct {
-	conn net.Conn
+	conn     net.Conn
+	payloads chan []byte
 }
 
 type ServerTcp struct {
@@ -92,7 +93,8 @@ func (s ServerTcp) startListener(listener net.Listener) {
 		}
 
 		client := &Client{
-			conn: conn,
+			conn:     conn,
+			payloads: make(chan []byte, 2000000),
 		}
 
 		go client.handleRequest()
@@ -105,6 +107,8 @@ var lock sync.Mutex
 func (client *Client) handleRequest() {
 	const MAX_BUFFER_SIZE = 1024 * 16
 	const TMP_BUFFER_SIZE = 1024 * 1
+
+	go client.processPayloads()
 
 	bufReader := bufio.NewReader(client.conn)
 
@@ -157,21 +161,28 @@ func (client *Client) handleRequest() {
 		// 	client.conn.Close()
 		// 	return
 		// }
-		go client.processPayload(receivedBytes)
+		client.payloads <- receivedBytes
+
 		// receivedMessage, err := ParseBytesToMessage(buf)
 	}
 }
 
-func (client *Client) processPayload(receivedbytes []byte) {
-	_, err := client.conn.Write([]byte("+OK\n"))
-	if err != nil {
-		fmt.Println(err)
-		client.conn.Close()
+func (client *Client) processPayloads() {
+
+	for {
+		<-client.payloads
+
+		_, err := client.conn.Write([]byte("+OK\n"))
+		if err != nil {
+			fmt.Println(err)
+			client.conn.Close()
+		}
+
+		lock.Lock()
+		globalCounter++
+		lock.Unlock()
+
+		fmt.Println(globalCounter)
 	}
 
-	lock.Lock()
-	globalCounter++
-	lock.Unlock()
-
-	fmt.Println(globalCounter)
 }
