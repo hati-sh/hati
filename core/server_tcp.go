@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bufio"
 	"crypto/tls"
 	"fmt"
 	"io"
@@ -102,10 +103,12 @@ func (client *Client) handleRequest() {
 	const TMP_BUFFER_SIZE = 1024 * 1
 
 	for {
-		buf := make([]byte, 0, MAX_BUFFER_SIZE)
-		tmp := make([]byte, TMP_BUFFER_SIZE)
+		receivedBytes, err := bufio.NewReader(client.conn).ReadBytes('\n')
 
-		n, err := client.conn.Read(tmp)
+		if len(receivedBytes) < 1 {
+			client.conn.Close()
+			return
+		}
 
 		if err != nil {
 			if err != io.EOF {
@@ -117,17 +120,43 @@ func (client *Client) handleRequest() {
 			fmt.Println(err)
 			break
 		}
-		buf = append(buf, tmp[:n]...)
 
-		receivedMessage, errParse := ParseBytesToMessage(buf)
-		if errParse != nil {
-			client.conn.Write([]byte(errParse.Error()))
-			client.conn.Close()
-			return
-		}
+		// payloadBuffer := make([]byte, contentLength)
+		// n, _ := io.ReadFull(client.conn, payloadBuffer)
+
+		// fmt.Println(string(contentLengthBytes))
+		// fmt.Println("=======")
+		// fmt.Println(n)
+		// fmt.Println(payloadBuffer)
+		// fmt.Println(contentLength)
+
+		// fmt.Println(string(receivedContentLengthBytes[0 : len(receivedContentLengthBytes)-1]))
+
+		// payloadBuffer := make([]byte,)
+
+		// cmd := bytes.ToUpper(bytes.TrimSpace(bytes.Split(message, []byte(" "))[0]))
+		// args := bytes.TrimSpace(bytes.TrimPrefix(message, cmd))
+
+		// buffer := make([]byte, 0, 10)
+		// n, _ := io.ReadFull(client.conn, buffer)
+
+		// fmt.Println(n)
+		// fmt.Println(buffer)
+		// receivedMore , _ := bufio.NewReader(client.conn).Read
+		// buf = append(buf, tmp[:n]...)
+
+		// receivedMessage, errParse := ParseBytesToMessage(receivedBytes)
+		// if errParse != nil {
+		// 	client.conn.Write([]byte(errParse.Error()))
+		// 	client.conn.Close()
+		// 	return
+		// }
 
 		client.conn.Write([]byte("+OK\n"))
-		fmt.Println(string(receivedMessage.payload))
+
+		client.processPayload(receivedBytes)
 		// receivedMessage, err := ParseBytesToMessage(buf)
 	}
 }
+
+func (client *Client) processPayload(payload []byte) {}

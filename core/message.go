@@ -1,10 +1,8 @@
 package core
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"strconv"
 )
 
 var ErrInvalidHeader = errors.New("invalid header")
@@ -43,55 +41,55 @@ func (m *Message) SetExtraSpace(extraSpace [4]byte) {
 	m.extraSpace = extraSpace
 }
 
-func ParseBytesToMessage(in []byte) (*Message, error) {
-	receivedHeaderBytes := in[0:8]
+// func ParseBytesToMessage(in []byte) (*Message, error) {
+// 	receivedHeaderBytes := in[0:8]
 
-	if bytes.Compare(receivedHeaderBytes, MESSAGE_HEADER[:]) != 0 {
-		return nil, ErrInvalidHeader
-	}
+// 	if bytes.Compare(receivedHeaderBytes, MESSAGE_HEADER[:]) != 0 {
+// 		return nil, ErrInvalidHeader
+// 	}
 
-	firstNewLineIdx := bytes.IndexByte(in, '\n')
-	if firstNewLineIdx <= 15 {
-		return nil, ErrInvalidHeader
-	}
+// 	firstNewLineIdx := bytes.IndexByte(in, '\n')
+// 	if firstNewLineIdx <= 15 {
+// 		return nil, ErrInvalidHeader
+// 	}
 
-	var extraSpace [4]byte = [4]byte{in[9], in[10], in[11], in[12]}
-	clHeader := in[12:firstNewLineIdx]
+// 	var extraSpace [4]byte = [4]byte{in[9], in[10], in[11], in[12]}
+// 	clHeader := in[12:firstNewLineIdx]
 
-	if bytes.Compare(clHeader[0:3], []byte{'C', 'L', ':'}) != 0 {
-		return nil, ErrInvalidHeader
-	}
+// 	if bytes.Compare(clHeader[0:3], []byte{'C', 'L', ':'}) != 0 {
+// 		return nil, ErrInvalidHeader
+// 	}
 
-	var contentLength int
+// 	var contentLength int
 
-	contentLength, err := strconv.Atoi(string(in[15:firstNewLineIdx]))
-	if err != nil {
-		return nil, ErrInvalidPayload
-	}
+// 	contentLength, err := strconv.Atoi(string(in[15:firstNewLineIdx]))
+// 	if err != nil {
+// 		return nil, ErrInvalidPayload
+// 	}
 
-	payloadStartIdx := firstNewLineIdx + 1
-	payloadEndIdx := payloadStartIdx + contentLength
+// 	payloadStartIdx := firstNewLineIdx + 1
+// 	payloadEndIdx := payloadStartIdx + contentLength
 
-	payload := in[payloadStartIdx:payloadEndIdx]
+// 	payload := in[payloadStartIdx:payloadEndIdx]
 
-	eopStartIdx := payloadEndIdx
-	eopEndIdx := eopStartIdx + 4
+// 	eopStartIdx := payloadEndIdx
+// 	eopEndIdx := eopStartIdx + 4
 
-	if bytes.Compare(in[eopStartIdx:eopEndIdx], []byte{'E', 'O', 'P', '\n'}) != 0 {
-		fmt.Println("x <")
+// 	if bytes.Compare(in[eopStartIdx:eopEndIdx], []byte{'E', 'O', 'P', '\n'}) != 0 {
+// 		fmt.Println("x <")
 
-		return nil, ErrInvalidPayload
-	}
+// 		return nil, ErrInvalidPayload
+// 	}
 
-	if bytes.Compare(in[eopStartIdx:eopEndIdx], []byte{'E', 'O', 'P', '\n'}) != 0 {
-		fmt.Println("y <")
+// 	if bytes.Compare(in[eopStartIdx:eopEndIdx], []byte{'E', 'O', 'P', '\n'}) != 0 {
+// 		fmt.Println("y <")
 
-		return nil, ErrInvalidEOF
-	}
+// 		return nil, ErrInvalidEOF
+// 	}
 
-	return &Message{
-		header:     [8]byte(receivedHeaderBytes),
-		payload:    payload,
-		extraSpace: extraSpace,
-	}, nil
-}
+// 	return &Message{
+// 		header:     [8]byte(receivedHeaderBytes),
+// 		payload:    payload,
+// 		extraSpace: extraSpace,
+// 	}, nil
+// }
