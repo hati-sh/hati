@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -34,7 +36,8 @@ var cmdStart = &cobra.Command{
 			},
 		}
 
-		hati := core.NewHati(config)
+		ctx := context.Background()
+		hati := core.NewHati(ctx, config)
 
 		if err := hati.Start(); err != nil {
 			panic(err)
@@ -46,6 +49,7 @@ var cmdStart = &cobra.Command{
 		for {
 			select {
 			case <-osSignal:
+				fmt.Println("stop signal...")
 				hati.Stop()
 
 				os.Exit(0)
