@@ -5,9 +5,11 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/hati-sh/hati/common"
+	"github.com/hati-sh/hati/common/logger"
 )
 
 const TCP_PAYLOAD_HANDLER_CHAN_SIZE = 2000000
@@ -24,6 +26,8 @@ type ServerTcp struct {
 	listener               net.Listener
 	payloadHandlerCallback PayloadHandlerCallback
 	stopChan               chan bool
+	clients                map[net.Conn]*ServerTcpClient
+	clientsLock            sync.Mutex
 }
 
 type tcpKeepAliveListener struct {
@@ -58,10 +62,11 @@ func NewServerTcp(ctx context.Context, payloadHandlerCallback PayloadHandlerCall
 		tlsCertificate:         cert,
 		payloadHandlerCallback: payloadHandlerCallback,
 		stopChan:               make(chan bool),
+		clients:                make(map[net.Conn]*ServerTcpClient),
 	}, nil
 }
 
-func (s ServerTcp) Start() error {
+func (s *ServerTcp) Start() error {
 	var err error
 
 	s.listener, err = net.Listen("tcp", fmt.Sprintf("%s:%s", s.host, s.port))
@@ -85,32 +90,42 @@ func (s ServerTcp) Start() error {
 	return nil
 }
 
-func (s ServerTcp) Stop() {
+func (s *ServerTcp) Stop() {
 	// s.stopChan <- true
 }
 
-func (s ServerTcp) startListener(listener net.Listener) {
+func (s *ServerTcp) clientsGc() {
+	for {
+		select {
+		default:
+			{
+			}
+		}
+	}
+}
+
+func (s *ServerTcp) startListener(listener net.Listener) {
 	defer s.listener.Close()
 
 	for {
-		// select {
-		// case <-s.ctx.Done():
-		// 	{
-
-		// 	}
-		// default:
-		// 	{
 		conn, err := listener.Accept()
 
 		if err != nil {
-			fmt.Println(err)
+			logger.Error(err)
 			continue
 		}
 
-		client := NewServerTcpClient(conn, s.payloadHandlerCallback)
+		s.clientsLock.Lock()
+		stopChan := make(chan bool)
+		s.clients[conn] = NewServerTcpClient(conn, s.payloadHandlerCallback, stopChan)
+		s.clientsLock.Unlock()
 
-		go client.handleRequest()
-		// }
-		// }
+		go s.clients[conn].handleRequest()
 	}
+
+	logger.Debug("stop: startListener")
+}
+
+func (s *ServerTcp) removeConnection(conn net.Conn) {
+	delete(s.clients, conn)
 }
