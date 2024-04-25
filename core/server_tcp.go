@@ -11,6 +11,8 @@ import (
 	"github.com/hati-sh/hati/common"
 )
 
+const TcpHandlerPayloadChanSize = 5000000
+
 type tcpKeepAliveListener struct {
 	*net.TCPListener
 }
@@ -26,8 +28,9 @@ func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
 }
 
 type Client struct {
-	conn     net.Conn
-	payloads chan []byte
+	conn                   net.Conn
+	payloads               chan []byte
+	commandHandlerCallback CommandHandlerCallback
 }
 
 type ServerTcp struct {
@@ -57,7 +60,7 @@ func NewServerTcp(host string, port string, tlsEnabled bool) (ServerTcp, error) 
 	}, nil
 }
 
-func (s ServerTcp) Start() error {
+func (s ServerTcp) Start(commandHandlerCallback CommandHandlerCallback) error {
 	var err error
 
 	s.listener, err = net.Listen("tcp", fmt.Sprintf("%s:%s", s.host, s.port))
@@ -73,15 +76,15 @@ func (s ServerTcp) Start() error {
 
 		s.listener = tls.NewListener(tcpKeepAliveListener{s.listener.(*net.TCPListener)}, config)
 
-		go s.startListener(s.listener)
+		go s.startListener(s.listener, commandHandlerCallback)
 	} else {
-		go s.startListener(s.listener)
+		go s.startListener(s.listener, commandHandlerCallback)
 	}
 
 	return nil
 }
 
-func (s ServerTcp) startListener(listener net.Listener) {
+func (s ServerTcp) startListener(listener net.Listener, commandHandlerCallback CommandHandlerCallback) {
 	defer s.listener.Close()
 
 	for {
@@ -92,8 +95,9 @@ func (s ServerTcp) startListener(listener net.Listener) {
 		}
 
 		client := &Client{
-			conn:     conn,
-			payloads: make(chan []byte, 5000000),
+			conn:                   conn,
+			payloads:               make(chan []byte, TcpHandlerPayloadChanSize),
+			commandHandlerCallback: commandHandlerCallback,
 		}
 
 		go client.handleRequest()
@@ -136,6 +140,8 @@ func (client *Client) processPayloads() {
 		}
 
 		fmt.Println(string(payload))
+
+		client.commandHandlerCallback(payload)
 	}
 
 }

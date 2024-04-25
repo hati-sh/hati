@@ -1,13 +1,21 @@
 package core
 
+import (
+	"fmt"
+
+	"github.com/hati-sh/hati/storage"
+)
+
 type Hati struct {
 	config    *Config
+	storage   storage.Storage
 	serverTcp ServerTcp
 }
 
 func NewHati(config *Config) Hati {
 	return Hati{
-		config: config,
+		config:  config,
+		storage: storage.New(),
 	}
 }
 
@@ -19,11 +27,15 @@ func (h *Hati) Start() error {
 		return err
 	}
 
-	if err := h.serverTcp.Start(); err != nil {
+	if err := h.serverTcp.Start(h.processCommand); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (h *Hati) processCommand(payload []byte) {
+	fmt.Println("processCommand")
 }
 
 func (h *Hati) Stop() {}
