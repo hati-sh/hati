@@ -6,12 +6,29 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/hati-sh/hati/common"
 	"github.com/hati-sh/hati/common/logger"
 )
 
+const TCP_PAYLOAD_HANDLER_CHAN_SIZE = 2000000
+
 type PayloadHandler func(payload []byte) ([]byte, error)
+
+type tcpKeepAliveListener struct {
+	*net.TCPListener
+}
+
+func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
+	tc, err := ln.AcceptTCP()
+	if err != nil {
+		return
+	}
+	tc.SetKeepAlive(true)
+	tc.SetKeepAlivePeriod(3 * time.Minute)
+	return tc, nil
+}
 
 type TcpServerConfig struct {
 	Host       string
@@ -28,6 +45,8 @@ type TcpServer struct {
 	stopChan         chan bool
 	stopWg           sync.WaitGroup
 	listenerStopChan chan bool
+	clients          map[net.Conn]*TcpServerClient
+	clientsMutex     sync.Mutex
 }
 
 func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler PayloadHandler) TcpServer {
@@ -49,6 +68,7 @@ func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler P
 		payloadHandler:   payloadHandler,
 		stopChan:         make(chan bool),
 		listenerStopChan: make(chan bool),
+		clients:          make(map[net.Conn]*TcpServerClient),
 	}
 }
 
@@ -79,12 +99,12 @@ func (s *TcpServer) Stop() {
 	s.stopChan <- true
 
 	s.stopWg.Wait()
-	fmt.Println("tcpServer Stop")
+	logger.Debug("tcpServer Stop")
 }
 
 func (s *TcpServer) WaitForStop() {
 	s.stopWg.Wait()
-	fmt.Println("tcpServer WaitForStop")
+	logger.Debug("tcpServer WaitForStop")
 }
 
 func (s *TcpServer) startListener() {
@@ -93,7 +113,7 @@ func (s *TcpServer) startListener() {
 
 OuterLoop:
 	for {
-		_, err := s.listener.Accept()
+		conn, err := s.listener.Accept()
 
 		if err != nil {
 			select {
@@ -103,11 +123,19 @@ OuterLoop:
 				logger.Error(err.Error())
 			}
 		} else {
-			fmt.Println("accept conn?")
+			s.handleConnection(conn)
 		}
 	}
 
-	fmt.Println("stop startListener")
+	logger.Debug("stop startListener")
+}
+
+func (s *TcpServer) handleConnection(conn net.Conn) {
+	s.clientsMutex.Lock()
+	s.clients[conn] = NewTcpServerClient(s.ctx, &s.stopWg, conn, s.payloadHandler)
+	s.clientsMutex.Unlock()
+
+	go s.clients[conn].start()
 }
 
 func (s *TcpServer) daemon(stopChan <-chan bool) {
@@ -121,7 +149,9 @@ OuterLoop:
 		select {
 		case <-stopChan:
 			s.listener.Close()
-			fmt.Println("daemon stop")
+
+			logger.Debug("daemon stop")
+
 			s.listenerStopChan <- true
 
 			break OuterLoop
@@ -129,7 +159,7 @@ OuterLoop:
 			s.listener.Close()
 			s.listenerStopChan <- true
 
-			fmt.Println("ctx daemon stop")
+			logger.Debug("ctx daemon stop")
 
 			break OuterLoop
 		}

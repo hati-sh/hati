@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"errors"
-	"fmt"
 )
 
 type CommandHandler struct {
@@ -11,8 +10,8 @@ type CommandHandler struct {
 }
 
 func (ch *CommandHandler) processPayload(payload []byte) ([]byte, error) {
-	fmt.Println("command handler processing payload ProcessPayload: ")
-	fmt.Println(string(payload))
+	// fmt.Println("command handler processing payload ProcessPayload: ")
+	// fmt.Println(string(payload))
 
 	if payload != nil {
 		response := []byte("+OK\n")
