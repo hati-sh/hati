@@ -32,8 +32,11 @@ func NewHati(ctx context.Context, config *Config) *Hati {
 	hati.broker = broker.New(hati.stopCtx)
 
 	hati.commandHandler = CommandHandler{
-		ctx: hati.stopCtx,
+		ctx:     hati.stopCtx,
+		storage: &hati.storage,
+		broker:  &hati.broker,
 	}
+
 	hati.tcpServer = NewTcpServer(hati.stopCtx, config.ServerTcp, hati.commandHandler.processPayload)
 
 	return hati

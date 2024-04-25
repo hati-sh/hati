@@ -151,7 +151,9 @@ OuterLoop:
 		select {
 		case conn := <-s.clientStoppedChan:
 			conn.Close()
+			s.clientsMutex.Lock()
 			delete(s.clients, conn)
+			s.clientsMutex.Unlock()
 			logger.Debug("tcp client removed from map")
 		case <-stopChan:
 			s.listener.Close()

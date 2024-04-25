@@ -1,6 +1,9 @@
 package storage
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 type Type string
 
@@ -17,4 +20,25 @@ func New(ctx context.Context) Storage {
 		ctx:    ctx,
 		Memory: NewMemoryStorage(),
 	}
+}
+
+func (s *Storage) Set(storageType Type, key []byte, value []byte) error {
+	if storageType == Memory && s.Memory.Set(key, value) {
+		return nil
+	}
+
+	return errors.New("")
+}
+
+func (s *Storage) Get(storageType Type, key []byte) ([]byte, error) {
+	if storageType == Memory {
+		value, err := s.Memory.Get(key)
+		if err != nil {
+			return nil, err
+		}
+
+		return value, nil
+	}
+
+	return nil, errors.New("")
 }

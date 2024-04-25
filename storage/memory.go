@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-var ErrKeyNotExist = errors.New("KEY_NOT_EXIST")
+var ErrKeyNotExist = errors.New("KEY_NOT_EXIST\n")
 
 type memoryStorage struct {
 	store  map[string][]byte
@@ -22,28 +22,31 @@ func (s *memoryStorage) Has(key string) bool {
 	return s.store[key] != nil
 }
 
-// Set
-func (s *memoryStorage) Set(key string, value []byte) bool {
-
+func (s *memoryStorage) Set(key []byte, value []byte) bool {
 	s.rwLock.Lock()
-	s.store[key] = value
-	s.rwLock.Unlock()
+	defer s.rwLock.Unlock()
+
+	s.store[string(key)] = value
 
 	return true
 }
 
-func (s *memoryStorage) Get(key string) ([]byte, error) {
-	if s.store[key] != nil {
-		return nil, ErrKeyNotExist
+func (s *memoryStorage) Get(key []byte) ([]byte, error) {
+	s.rwLock.RLock()
+	defer s.rwLock.RUnlock()
+
+	if s.store[string(key)] != nil {
+		return s.store[string(key)], nil
 	}
 
-	return s.store[key], nil
+	return nil, ErrKeyNotExist
 }
 
 func (s *memoryStorage) Delete(key string) {
+	s.rwLock.Lock()
+	defer s.rwLock.Unlock()
+
 	if s.store[key] != nil {
-		s.rwLock.Lock()
-		s.store[key] = nil
-		s.rwLock.Unlock()
+		delete(s.store, key)
 	}
 }
