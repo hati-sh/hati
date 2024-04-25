@@ -20,9 +20,10 @@ type TcpServerClient struct {
 	payloads                   chan []byte
 	stopProcessingPayloadsChan chan bool
 	payloadHandler             PayloadHandler
+	clientStoppedChan          chan net.Conn
 }
 
-func NewTcpServerClient(ctx context.Context, stopWg *sync.WaitGroup, conn net.Conn, payloadHandler PayloadHandler) *TcpServerClient {
+func NewTcpServerClient(ctx context.Context, stopWg *sync.WaitGroup, clientStoppedChan chan net.Conn, conn net.Conn, payloadHandler PayloadHandler) *TcpServerClient {
 	ctxStop, ctxStopCancel := context.WithCancel(ctx)
 
 	return &TcpServerClient{
@@ -35,6 +36,7 @@ func NewTcpServerClient(ctx context.Context, stopWg *sync.WaitGroup, conn net.Co
 		stopProcessingPayloadsChan: make(chan bool),
 		connReadOutChan:            make(chan []byte, TCP_PAYLOAD_HANDLER_CHAN_SIZE),
 		payloadHandler:             payloadHandler,
+		clientStoppedChan:          clientStoppedChan,
 	}
 }
 
@@ -67,6 +69,8 @@ OuterLoop:
 	if c.stopProcessingPayloadsChan != nil {
 		close(c.stopProcessingPayloadsChan)
 	}
+
+	c.clientStoppedChan <- c.conn
 
 	fmt.Println("stop TcpServerClient start")
 }

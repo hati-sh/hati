@@ -37,16 +37,17 @@ type TcpServerConfig struct {
 }
 
 type TcpServer struct {
-	ctx              context.Context
-	config           *TcpServerConfig
-	tlsCertificate   tls.Certificate
-	listener         net.Listener
-	payloadHandler   PayloadHandler
-	stopChan         chan bool
-	stopWg           sync.WaitGroup
-	listenerStopChan chan bool
-	clients          map[net.Conn]*TcpServerClient
-	clientsMutex     sync.Mutex
+	ctx               context.Context
+	config            *TcpServerConfig
+	tlsCertificate    tls.Certificate
+	listener          net.Listener
+	payloadHandler    PayloadHandler
+	stopChan          chan bool
+	stopWg            sync.WaitGroup
+	listenerStopChan  chan bool
+	clients           map[net.Conn]*TcpServerClient
+	clientsMutex      sync.Mutex
+	clientStoppedChan chan net.Conn
 }
 
 func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler PayloadHandler) TcpServer {
@@ -62,13 +63,14 @@ func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler P
 	}
 
 	return TcpServer{
-		ctx:              ctx,
-		config:           config,
-		tlsCertificate:   cert,
-		payloadHandler:   payloadHandler,
-		stopChan:         make(chan bool),
-		listenerStopChan: make(chan bool),
-		clients:          make(map[net.Conn]*TcpServerClient),
+		ctx:               ctx,
+		config:            config,
+		tlsCertificate:    cert,
+		payloadHandler:    payloadHandler,
+		stopChan:          make(chan bool),
+		listenerStopChan:  make(chan bool),
+		clients:           make(map[net.Conn]*TcpServerClient),
+		clientStoppedChan: make(chan net.Conn, 1000),
 	}
 }
 
@@ -132,7 +134,7 @@ OuterLoop:
 
 func (s *TcpServer) handleConnection(conn net.Conn) {
 	s.clientsMutex.Lock()
-	s.clients[conn] = NewTcpServerClient(s.ctx, &s.stopWg, conn, s.payloadHandler)
+	s.clients[conn] = NewTcpServerClient(s.ctx, &s.stopWg, s.clientStoppedChan, conn, s.payloadHandler)
 	s.clientsMutex.Unlock()
 
 	go s.clients[conn].start()
@@ -147,6 +149,10 @@ func (s *TcpServer) daemon(stopChan <-chan bool) {
 OuterLoop:
 	for {
 		select {
+		case conn := <-s.clientStoppedChan:
+			conn.Close()
+			delete(s.clients, conn)
+			logger.Debug("tcp client removed from map")
 		case <-stopChan:
 			s.listener.Close()
 
