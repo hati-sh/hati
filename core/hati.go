@@ -2,56 +2,57 @@ package core
 
 import (
 	"context"
-	"errors"
+	"sync"
 
+	"github.com/hati-sh/hati/broker"
 	"github.com/hati-sh/hati/storage"
 )
 
 type Hati struct {
-	config        *Config
-	storage       storage.Storage
-	serverTcp     ServerTcp
-	stopCtx       context.Context
-	stopCtxCancel context.CancelFunc
+	config         *Config
+	stopCtx        context.Context
+	stopCtxCancel  context.CancelFunc
+	stopWg         sync.WaitGroup
+	tcpServer      TcpServer
+	commandHandler CommandHandler
+	storage        storage.Storage
+	broker         broker.Broker
 }
 
-func NewHati(ctx context.Context, config *Config) Hati {
+func NewHati(ctx context.Context, config *Config) *Hati {
 	stopCtx, stopCtxCancel := context.WithCancel(ctx)
 
-	return Hati{
+	hati := &Hati{
 		config:        config,
-		storage:       storage.New(),
 		stopCtx:       stopCtx,
 		stopCtxCancel: stopCtxCancel,
 	}
+
+	hati.storage = storage.New(hati.stopCtx)
+	hati.broker = broker.New(hati.stopCtx)
+
+	hati.commandHandler = CommandHandler{
+		ctx: hati.stopCtx,
+	}
+	hati.tcpServer = NewTcpServer(hati.stopCtx, config.ServerTcp, hati.commandHandler.processPayload)
+
+	return hati
 }
 
 func (h *Hati) Start() error {
 	var err error
 
-	h.serverTcp, err = NewServerTcp(h.stopCtx, h.commandHandler, h.config.ServerTcp.Host, h.config.ServerTcp.Port, h.config.ServerTcp.TlsEnabled)
-	if err != nil {
-		return err
-	}
-
-	if err := h.serverTcp.Start(); err != nil {
+	if err = h.tcpServer.Start(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (h *Hati) commandHandler(payload []byte) ([]byte, error) {
-
-	if payload != nil {
-		response := []byte("+OK\n")
-
-		return response, nil
-	}
-
-	return nil, errors.New("+ERR\n")
-}
-
 func (h *Hati) Stop() {
-	h.serverTcp.Stop()
+	h.stopCtxCancel()
+
+	h.tcpServer.WaitForStop()
+
+	h.stopWg.Wait()
 }

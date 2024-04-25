@@ -29,7 +29,7 @@ var cmdStart = &cobra.Command{
 		}
 
 		config := &core.Config{
-			ServerTcp: &core.ServerTcpConfig{
+			ServerTcp: &core.TcpServerConfig{
 				Host:       host,
 				Port:       port,
 				TlsEnabled: tlsEnabled,
@@ -50,6 +50,7 @@ var cmdStart = &cobra.Command{
 			select {
 			case <-osSignal:
 				fmt.Println("stop signal...")
+
 				hati.Stop()
 
 				os.Exit(0)

@@ -1,1 +1,4 @@
 build/
+tmp/
+_tmp/
+.tmp/
