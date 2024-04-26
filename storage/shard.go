@@ -7,8 +7,7 @@ import (
 
 type Shard struct {
 	sync.RWMutex
-	m           map[string][]byte
-	mShardMutex sync.RWMutex
+	m map[string][]byte
 }
 
 type ShardMap []*Shard
@@ -28,7 +27,7 @@ func (m ShardMap) getShardKey(key string) int {
 }
 
 func (m ShardMap) GetShard(key string) *Shard {
-	// mShardMutex
+	// mShardMutex ?
 	shardKey := m.getShardKey(key)
 	return m[shardKey]
 }

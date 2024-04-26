@@ -17,7 +17,6 @@ type TcpServerClient struct {
 	ctxStopCancel              context.CancelFunc
 	conn                       net.Conn
 	stopWg                     *sync.WaitGroup
-	connReadOutChan            chan []byte
 	payloads                   chan []byte
 	stopProcessingPayloadsChan chan bool
 	payloadHandler             PayloadHandler
@@ -35,7 +34,6 @@ func NewTcpServerClient(ctx context.Context, stopWg *sync.WaitGroup, clientStopp
 		stopWg:                     stopWg,
 		payloads:                   make(chan []byte, TCP_PAYLOAD_HANDLER_CHAN_SIZE),
 		stopProcessingPayloadsChan: make(chan bool),
-		connReadOutChan:            make(chan []byte, TCP_PAYLOAD_HANDLER_CHAN_SIZE),
 		payloadHandler:             payloadHandler,
 		clientStoppedChan:          clientStoppedChan,
 	}
@@ -46,16 +44,11 @@ func (c *TcpServerClient) start() {
 	defer c.conn.Close()
 	defer c.stopWg.Done()
 
-	go c.processPayloads()
 	go c.scanForIncomingBytes()
 
 OuterLoop:
 	for {
 		select {
-		case payload := <-c.connReadOutChan:
-			{
-				c.payloads <- payload
-			}
 		case <-c.ctx.Done():
 			{
 				break OuterLoop
@@ -80,7 +73,6 @@ func (c *TcpServerClient) scanForIncomingBytes() {
 	c.stopWg.Add(1)
 
 	defer c.conn.Close()
-	defer close(c.connReadOutChan)
 	defer c.ctxStopCancel()
 	defer c.stopWg.Done()
 
@@ -99,47 +91,24 @@ func (c *TcpServerClient) scanForIncomingBytes() {
 			break
 		}
 
-		c.connReadOutChan <- scanner.Bytes()
-	}
+		payload := scanner.Bytes()
+		response, err := c.payloadHandler(payload)
+		if err != nil {
+			if _, err := c.conn.Write([]byte(err.Error())); err != nil {
+				logger.Error(err)
 
-	logger.Debug("stop scanForIncomingBytes")
-}
-
-func (c *TcpServerClient) processPayloads() {
-	c.stopWg.Add(1)
-	defer c.conn.Close()
-
-	defer c.ctxStopCancel()
-	defer c.stopWg.Done()
-
-OuterLoop:
-	for {
-		select {
-		case payload := <-c.payloads:
-			{
-				response, err := c.payloadHandler(payload)
-				if err != nil {
-					if _, err := c.conn.Write([]byte(err.Error())); err != nil {
-						logger.Error(err)
-
-						break OuterLoop
-					}
-					continue
-				}
-
-				_, err = c.conn.Write(response)
-				if err != nil {
-					logger.Error(err)
-
-					break OuterLoop
-				}
+				continue
 			}
-		case <-c.stopProcessingPayloadsChan:
-			logger.Debug("stopChan: stopProcessPayloadsChan")
+			continue
+		}
 
-			break OuterLoop
+		_, err = c.conn.Write(response)
+		if err != nil {
+			logger.Error(err)
+
+			break
 		}
 	}
 
-	logger.Debug("stop processPayloads")
+	logger.Debug("stop scanForIncomingBytes")
 }
