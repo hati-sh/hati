@@ -13,5 +13,4 @@ RUN make build
 
 EXPOSE 4242
 
-# CMD ["/hati/build/bin/hati"]
 ENTRYPOINT ["/hati/entrypoint.sh"]
