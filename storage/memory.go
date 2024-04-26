@@ -18,8 +18,8 @@ func NewMemoryStorage() *memoryStorage {
 	}
 }
 
-func (s *memoryStorage) Has(key string) bool {
-	return s.store[key] != nil
+func (s *memoryStorage) Has(key []byte) bool {
+	return s.store[string(key)] != nil
 }
 
 func (s *memoryStorage) Set(key []byte, value []byte) bool {
@@ -42,11 +42,12 @@ func (s *memoryStorage) Get(key []byte) ([]byte, error) {
 	return nil, ErrKeyNotExist
 }
 
-func (s *memoryStorage) Delete(key string) {
+func (s *memoryStorage) Delete(key []byte) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
 
-	if s.store[key] != nil {
-		delete(s.store, key)
+	keyString := string(key)
+	if s.store[keyString] != nil {
+		delete(s.store, keyString)
 	}
 }

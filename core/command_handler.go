@@ -26,6 +26,15 @@ func (ch *CommandHandler) processPayload(payload []byte) ([]byte, error) {
 		return ch.set(payloadArr)
 	} else if bytes.Equal(payloadArr[0], CmdGet) {
 		return ch.get(payloadArr)
+	} else if bytes.Equal(payloadArr[0], CmdHas) {
+		if ch.has(payloadArr) {
+			return CmdOk, nil
+		}
+		return nil, errors.New(string(CmdErr))
+	} else if bytes.Equal(payloadArr[0], CmdDelete) {
+		ch.delete(payloadArr)
+
+		return CmdOk, nil
 	}
 
 	return nil, errors.New(string(CmdErr))
@@ -52,4 +61,18 @@ func (ch *CommandHandler) get(payloadArr [][]byte) ([]byte, error) {
 	value = append(value, byte('\n'))
 
 	return value, nil
+}
+
+func (ch *CommandHandler) has(payloadArr [][]byte) bool {
+	key := payloadArr[2]
+
+	has := ch.storage.Memory.Has(key)
+
+	return has
+}
+
+func (ch *CommandHandler) delete(payloadArr [][]byte) {
+	key := payloadArr[2]
+
+	ch.storage.Memory.Delete(key)
 }
