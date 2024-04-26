@@ -5,6 +5,8 @@ import (
 	"errors"
 )
 
+const DEFAULT_NUMBER_OF_SHARDS = 20
+
 type Type string
 
 const Memory Type = "memory"

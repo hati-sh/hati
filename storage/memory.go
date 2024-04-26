@@ -8,46 +8,36 @@ import (
 var ErrKeyNotExist = errors.New("KEY_NOT_EXIST\n")
 
 type memoryStorage struct {
-	store  map[string][]byte
+	store  ShardMap
 	rwLock sync.RWMutex
 }
 
 func NewMemoryStorage() *memoryStorage {
 	return &memoryStorage{
-		store: make(map[string][]byte),
+		store: newShardMap(DEFAULT_NUMBER_OF_SHARDS),
 	}
 }
 
 func (s *memoryStorage) Has(key []byte) bool {
-	return s.store[string(key)] != nil
+
+	return s.store.Has(string(key))
 }
 
 func (s *memoryStorage) Set(key []byte, value []byte) bool {
-	s.rwLock.Lock()
-	defer s.rwLock.Unlock()
-
-	s.store[string(key)] = value
+	s.store.Set(string(key), value)
 
 	return true
 }
 
 func (s *memoryStorage) Get(key []byte) ([]byte, error) {
-	s.rwLock.RLock()
-	defer s.rwLock.RUnlock()
-
-	if s.store[string(key)] != nil {
-		return s.store[string(key)], nil
+	value, ok := s.store.Get(string(key))
+	if !ok {
+		return nil, ErrKeyNotExist
 	}
 
-	return nil, ErrKeyNotExist
+	return value, nil
 }
 
 func (s *memoryStorage) Delete(key []byte) {
-	s.rwLock.Lock()
-	defer s.rwLock.Unlock()
-
-	keyString := string(key)
-	if s.store[keyString] != nil {
-		delete(s.store, keyString)
-	}
+	s.store.Delete(string(key))
 }
