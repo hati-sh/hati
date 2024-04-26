@@ -1,6 +1,6 @@
 # @hatish/hati
 
-`v0.1.0-dev`
+`v0.2.0-dev`
 
 ```
 IN DEVELOPMENT. DO NOT USE IN PRODUCTION.
