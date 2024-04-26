@@ -33,6 +33,33 @@ Once connected as a client to Hati server you can publish commands which will be
 - TCP Server
 - Storing data in in-memory storage type
 
+## Configuration
+
+While starting Hati `hati start` there are configurational flags available to be set.
+
+- `--host` - determines bind host for TCP server, default value is `0.0.0.0`
+- `--port` - bind port for TCP server, default value is `4242`
+- `--data-dir` - absolute path to directory where Hati can store files
+- `--cpu` - amount of CPU cores which should be used by Hati, by default it will set for as many as available
+
+## Commands
+
+### Key-Value Storage
+
+`SET <type> <ttl> <key> <value>` - save key with provided value to the selected storage type.
+
+Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to zero `0` which means that value will be stored on the hard-drive. Ttl value is in ms, if higher than `0` Hati can guarantee that value will be stored at minimum for provided ttl value and will be removed from the storage shortly (as soon as possible) after that.
+
+**^^ TTL IS NOT IMPLEMENTED YET ^^**
+
+`HAS <type> <key>` - check if provided key exist in given storage type
+
+`GET <type> <key>` - get value for provided key in given storage type
+
+`DELETE <type> <key>` - get value for provided key in given storage type
+
+`FLUSHALL <type>` - flush (delete) all data from given storage type
+
 ## To do
 
 - [ ] Implement TTL
