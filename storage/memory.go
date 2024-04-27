@@ -2,20 +2,27 @@ package storage
 
 import (
 	"errors"
-	"sync"
 )
 
 var ErrKeyNotExist = errors.New("KEY_NOT_EXIST\n")
 
 type memoryStorage struct {
-	store  ShardMap
-	rwLock sync.RWMutex
+	store ShardMap
 }
 
 func NewMemoryStorage() *memoryStorage {
 	return &memoryStorage{
 		store: newShardMap(DEFAULT_NUMBER_OF_SHARDS),
 	}
+}
+
+func (s *memoryStorage) CountKeys() int {
+	var keysCount = 0
+
+	for _, sm := range s.store {
+		keysCount = keysCount + len(sm.m)
+	}
+	return keysCount
 }
 
 func (s *memoryStorage) Has(key []byte) bool {

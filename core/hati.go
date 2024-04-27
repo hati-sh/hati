@@ -39,7 +39,7 @@ func NewHati(ctx context.Context, config *Config) *Hati {
 	}
 
 	hati.tcpServer = NewTcpServer(hati.stopCtx, config.ServerTcp, hati.commandHandler.processPayload)
-	hati.rpcServer = NewRpcServer(hati.stopCtx, config.ServerRpc, hati.commandHandler.processPayload)
+	hati.rpcServer = NewRpcServer(hati.stopCtx, &hati.storage, config.ServerRpc)
 
 	return hati
 }

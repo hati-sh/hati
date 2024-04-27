@@ -5,17 +5,9 @@ import (
 	"io"
 	"net/http"
 	"net/rpc"
+
+	"github.com/hati-sh/hati/storage"
 )
-
-type Hello struct{}
-type Args struct{}
-
-func (t *Hello) Hi(args *Args, reply *string) error {
-	// Fill reply pointer to send the data back
-	*reply = "hi rpc"
-
-	return nil
-}
 
 type RpcServerConfig struct {
 	Host    string
@@ -24,28 +16,36 @@ type RpcServerConfig struct {
 }
 
 type RpcServer struct {
-	ctx            context.Context
-	config         *RpcServerConfig
-	payloadHandler PayloadHandler
+	ctx     context.Context
+	config  *RpcServerConfig
+	storage *storage.Storage
 }
 
-func NewRpcServer(ctx context.Context, config *RpcServerConfig, payloadHandler PayloadHandler) *RpcServer {
+func NewRpcServer(ctx context.Context, storage *storage.Storage, config *RpcServerConfig) *RpcServer {
 
 	return &RpcServer{
-		ctx:            ctx,
-		config:         config,
-		payloadHandler: payloadHandler,
+		ctx:     ctx,
+		config:  config,
+		storage: storage,
 	}
 }
 
 func (s *RpcServer) Start() error {
 	go func(s *RpcServer) {
-		hello := new(Hello)
-		rpc.Register(hello)
+
+		type Storage struct {
+			RpcStorageService
+		}
+
+		rpcStorage := new(Storage)
+		rpcStorage.RpcStorageService.storage = s.storage
+
+		rpc.Register(rpcStorage)
 
 		http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 			defer req.Body.Close()
 			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			res := newRPCRequest(req.Body).Call()
 			io.Copy(w, res)
 		})

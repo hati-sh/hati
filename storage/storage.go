@@ -24,6 +24,14 @@ func New(ctx context.Context) Storage {
 	}
 }
 
+func (s *Storage) Count(storageType Type) (int, error) {
+	if storageType == Memory {
+		return s.Memory.CountKeys(), nil
+	}
+
+	return 0, nil
+}
+
 func (s *Storage) Set(storageType Type, key []byte, value []byte) error {
 	if storageType == Memory && s.Memory.Set(key, value) {
 		return nil
