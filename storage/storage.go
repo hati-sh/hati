@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-const DEFAULT_NUMBER_OF_SHARDS = 20
+const DEFAULT_NUMBER_OF_SHARDS = 8
 
 type Type string
 
