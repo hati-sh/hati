@@ -30,8 +30,9 @@ Once connected as a client to Hati server you can publish commands which will be
 
 ## Current features
 
-- TCP Server
-- Storing data in in-memory storage type
+- TCP server
+- JSON-RPC server
+- Storing data in in-memory storage type - with sharding
 
 ## Configuration
 
@@ -45,7 +46,7 @@ While starting Hati `hati start` there are configurational flags available to be
 - `--data-dir` - absolute path to directory where Hati can store files, default `/current/path/to-hati/data`
 - `--cpu-num` - number of CPU cores which should be used by Hati, by default it will set for as many as available
 
-## Commands
+## Protocol Commands
 
 ### Key-Value Storage
 
@@ -62,6 +63,15 @@ Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to
 `DELETE <type> <key>` - get value for provided key in given storage type
 
 `FLUSHALL <type>` - flush (delete) all data from given storage type
+
+## JSON-RPC Methods
+
+- `Storage.Set` - set key and value
+- `Storage.Has` - check if provided key exist
+- `Storage.Get` - get key
+- `Storage.Delete` - delete key
+- `Storage.FlushAll` - deletes all keys
+- `Storage.Count` - returns number of keys
 
 ## To do
 
