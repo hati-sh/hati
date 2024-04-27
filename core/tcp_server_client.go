@@ -97,7 +97,7 @@ func (c *TcpServerClient) scanForIncomingBytes() {
 			if _, err := c.conn.Write([]byte(err.Error())); err != nil {
 				logger.Error(err)
 
-				continue
+				break
 			}
 			continue
 		}

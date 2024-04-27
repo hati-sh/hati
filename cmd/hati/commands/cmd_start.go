@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
+	"github.com/hati-sh/hati/common/logger"
 	"github.com/hati-sh/hati/core"
 	"github.com/spf13/cobra"
 )
@@ -18,14 +20,45 @@ var cmdStart = &cobra.Command{
 	Short: "start hati",
 	Long:  `start is for starting application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger.Log("++ hati ++ v" + VERSION)
+
+		cpuNum, _ := cmd.Flags().GetInt("cpu-num")
+
 		host, _ := cmd.Flags().GetString("host")
 		port, _ := cmd.Flags().GetString("port")
-		tlsFlag, _ := cmd.Flags().GetString("tls")
+
+		tlsFlag, _ := cmd.Flags().GetBool("tls")
+
+		rpcFlag, _ := cmd.Flags().GetBool("rpc")
+		rpcHost, _ := cmd.Flags().GetString("rpc-host")
+		rpcPort, _ := cmd.Flags().GetString("rpc-port")
+
+		dataDir, _ := cmd.Flags().GetString("data-dir")
 
 		tlsEnabled := false
+		rpcEnabled := false
 
-		if tlsFlag == "on" {
+		if cpuNum == 0 {
+			cpuNum = runtime.NumCPU()
+		}
+
+		runtime.GOMAXPROCS(cpuNum)
+		logger.Debug("Max CPU num: " + fmt.Sprint(cpuNum))
+
+		if host == "" {
+			host = "0.0.0.0"
+		}
+
+		if port == "" {
+			port = "4242"
+		}
+
+		if tlsFlag {
 			tlsEnabled = true
+		}
+
+		if rpcFlag {
+			rpcEnabled = true
 		}
 
 		config := &core.Config{
@@ -34,7 +67,14 @@ var cmdStart = &cobra.Command{
 				Port:       port,
 				TlsEnabled: tlsEnabled,
 			},
+			ServerRpc: &core.RpcServerConfig{
+				Host:    rpcHost,
+				Port:    rpcPort,
+				Enabled: rpcEnabled,
+			},
 		}
+
+		fmt.Printf("dataDir: %s\n\n", dataDir)
 
 		ctx := context.Background()
 		hati := core.NewHati(ctx, config)
@@ -43,7 +83,7 @@ var cmdStart = &cobra.Command{
 			panic(err)
 		}
 
-		var osSignal chan os.Signal = make(chan os.Signal, 1)
+		var osSignal = make(chan os.Signal, 1)
 		signal.Notify(osSignal, os.Interrupt, syscall.SIGTERM)
 
 		for {

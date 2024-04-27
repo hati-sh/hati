@@ -50,7 +50,7 @@ type TcpServer struct {
 	clientStoppedChan chan net.Conn
 }
 
-func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler PayloadHandler) TcpServer {
+func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler PayloadHandler) *TcpServer {
 	var cert tls.Certificate
 	var err error
 
@@ -62,7 +62,7 @@ func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler P
 		}
 	}
 
-	return TcpServer{
+	return &TcpServer{
 		ctx:               ctx,
 		config:            config,
 		tlsCertificate:    cert,

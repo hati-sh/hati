@@ -13,7 +13,8 @@ type Hati struct {
 	stopCtx        context.Context
 	stopCtxCancel  context.CancelFunc
 	stopWg         sync.WaitGroup
-	tcpServer      TcpServer
+	tcpServer      *TcpServer
+	rpcServer      *RpcServer
 	commandHandler CommandHandler
 	storage        storage.Storage
 	broker         broker.Broker
@@ -38,6 +39,7 @@ func NewHati(ctx context.Context, config *Config) *Hati {
 	}
 
 	hati.tcpServer = NewTcpServer(hati.stopCtx, config.ServerTcp, hati.commandHandler.processPayload)
+	hati.rpcServer = NewRpcServer(hati.stopCtx, config.ServerRpc, hati.commandHandler.processPayload)
 
 	return hati
 }
@@ -47,6 +49,12 @@ func (h *Hati) Start() error {
 
 	if err = h.tcpServer.Start(); err != nil {
 		return err
+	}
+
+	if h.config.ServerRpc.Enabled {
+		if err = h.rpcServer.Start(); err != nil {
+			return err
+		}
 	}
 
 	return nil

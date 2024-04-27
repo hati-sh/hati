@@ -39,8 +39,11 @@ While starting Hati `hati start` there are configurational flags available to be
 
 - `--host` - determines bind host for TCP server, default value is `0.0.0.0`
 - `--port` - bind port for TCP server, default value is `4242`
-- `--data-dir` - absolute path to directory where Hati can store files
-- `--cpu` - amount of CPU cores which should be used by Hati, by default it will set for as many as available
+- `--rpc` - indicates if should start JSON-RPC server, default `off`
+- `--rpc-host` - bind host for JSON-RPC server, default `0.0.0.0`
+- `--rpc-port` - bind port for JSON-RPC server, default `6666`
+- `--data-dir` - absolute path to directory where Hati can store files, default `/current/path/to-hati/data`
+- `--cpu-num` - number of CPU cores which should be used by Hati, by default it will set for as many as available
 
 ## Commands
 

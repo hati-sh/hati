@@ -11,12 +11,12 @@ build:
 .PHONY: dev
 dev:
 	@echo "\n> --- run in development mode --"
-	HATI_DEBUG=true HATI_DATA_DIR=./build go run --race ./cmd/hati/main.go start --host localhost --port 4242 --tls off
+	HATI_DEBUG=true HATI_DATA_DIR=./build go run --race ./cmd/hati/main.go start --host localhost --port 4242 --rpc
 
 .PHONY: dev-client
 dev-client:
 	@echo "\n> --- run in development mode --"
-	HATI_DEBUG=true HATI_DATA_DIR=./build go run ./cmd/hati/main.go client --host monorail.proxy.rlwy.net --port 17092 --tls off
+	HATI_DEBUG=true HATI_DATA_DIR=./build go run ./cmd/hati/main.go client --host monorail.proxy.rlwy.net --port 17092 
 
 
 .PHONY: hati
