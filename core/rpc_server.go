@@ -19,10 +19,10 @@ type RpcServerConfig struct {
 type RpcServer struct {
 	ctx            context.Context
 	config         *RpcServerConfig
-	storageManager *storage.StorageManager
+	storageManager *storage.Manager
 }
 
-func NewRpcServer(ctx context.Context, storageManager *storage.StorageManager, config *RpcServerConfig) *RpcServer {
+func NewRpcServer(ctx context.Context, storageManager *storage.Manager, config *RpcServerConfig) *RpcServer {
 
 	return &RpcServer{
 		ctx:            ctx,

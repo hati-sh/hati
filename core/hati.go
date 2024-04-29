@@ -17,7 +17,7 @@ type Hati struct {
 	rpcServer      *RpcServer
 	commandHandler CommandHandler
 	broker         broker.Broker
-	storageManager *storage.StorageManager
+	storageManager *storage.Manager
 }
 
 func NewHati(ctx context.Context, config *Config) *Hati {

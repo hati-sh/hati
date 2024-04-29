@@ -7,7 +7,7 @@ import (
 )
 
 type RpcStorageService struct {
-	storageManager *storage.StorageManager
+	storageManager *storage.Manager
 }
 
 type CountArgs struct {

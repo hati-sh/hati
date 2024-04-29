@@ -10,7 +10,7 @@ import (
 
 type CommandHandler struct {
 	ctx            context.Context
-	storageManager *storage.StorageManager
+	storageManager *storage.Manager
 	broker         *broker.Broker
 }
 

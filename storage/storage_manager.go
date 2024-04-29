@@ -7,14 +7,14 @@ import (
 
 // StorageManager is responsible for managing storages
 // it offers two storage types: MEMORY and HDD
-type StorageManager struct {
+type Manager struct {
 	ctx    context.Context
 	memory *memoryStorage
 	hdd    *hddStorage
 }
 
-func NewStorageManager(ctx context.Context) *StorageManager {
-	sm := &StorageManager{
+func NewStorageManager(ctx context.Context) *Manager {
+	sm := &Manager{
 		ctx: ctx,
 	}
 
@@ -24,7 +24,7 @@ func NewStorageManager(ctx context.Context) *StorageManager {
 	return sm
 }
 
-func (s *StorageManager) Count(storageType Type) (int, error) {
+func (s *Manager) Count(storageType Type) (int, error) {
 	if storageType == Memory {
 		return s.memory.CountKeys(), nil
 	}
@@ -32,7 +32,7 @@ func (s *StorageManager) Count(storageType Type) (int, error) {
 	return 0, nil
 }
 
-func (s *StorageManager) Set(storageType Type, key []byte, value []byte) error {
+func (s *Manager) Set(storageType Type, key []byte, value []byte) error {
 	if storageType == Memory && s.memory.Set(key, value) {
 		return nil
 	}
@@ -40,7 +40,7 @@ func (s *StorageManager) Set(storageType Type, key []byte, value []byte) error {
 	return errors.New("")
 }
 
-func (s *StorageManager) Get(storageType Type, key []byte) ([]byte, error) {
+func (s *Manager) Get(storageType Type, key []byte) ([]byte, error) {
 	if storageType == Memory {
 		value, err := s.memory.Get(key)
 		if err != nil {
@@ -53,7 +53,7 @@ func (s *StorageManager) Get(storageType Type, key []byte) ([]byte, error) {
 	return nil, errors.New("")
 }
 
-func (s *StorageManager) Has(storageType Type, key []byte) bool {
+func (s *Manager) Has(storageType Type, key []byte) bool {
 	if storageType == Memory && s.memory.Has(key) {
 		return true
 	}
@@ -61,7 +61,7 @@ func (s *StorageManager) Has(storageType Type, key []byte) bool {
 	return false
 }
 
-func (s *StorageManager) Delete(storageType Type, key []byte) bool {
+func (s *Manager) Delete(storageType Type, key []byte) bool {
 	switch storageType {
 	case Memory:
 		s.memory.Delete(key)
@@ -73,7 +73,7 @@ func (s *StorageManager) Delete(storageType Type, key []byte) bool {
 	}
 }
 
-func (s *StorageManager) FlushAll(storageType Type) bool {
+func (s *Manager) FlushAll(storageType Type) bool {
 	switch storageType {
 	case Memory:
 		return s.memory.FlushAll()
