@@ -25,9 +25,12 @@ func Execute() {
 	cmdClient.PersistentFlags().String("port", "4242", "target port")
 
 	var tlsFlagValue bool
+	var tcpFlagValue bool
 	var rpcFlagValue bool
 
-	cmdStart.Flags().BoolVar(&tlsFlagValue, "tls", false, "tls on/off, defaut: off")
+	cmdStart.Flags().BoolVar(&tcpFlagValue, "tcp", false, "tcp server true/false, defaut: false")
+	cmdStart.Flags().BoolVar(&tlsFlagValue, "tls", false, "tls for tcp server on/off, defaut: off")
+
 	cmdStart.Flags().BoolVar(&rpcFlagValue, "rpc", false, "rpc server true/false, defaut: false")
 
 	cmdClient.Flags().BoolVar(&tlsFlagValue, "tls", false, "tls on/off, defaut: off")

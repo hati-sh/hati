@@ -27,14 +27,16 @@ var cmdStart = &cobra.Command{
 		host, _ := cmd.Flags().GetString("host")
 		port, _ := cmd.Flags().GetString("port")
 
+		tcpFlag, _ := cmd.Flags().GetBool("tcp")
 		tlsFlag, _ := cmd.Flags().GetBool("tls")
-
 		rpcFlag, _ := cmd.Flags().GetBool("rpc")
+
 		rpcHost, _ := cmd.Flags().GetString("rpc-host")
 		rpcPort, _ := cmd.Flags().GetString("rpc-port")
 
 		dataDir, _ := cmd.Flags().GetString("data-dir")
 
+		tcpEnabled := false
 		tlsEnabled := false
 		rpcEnabled := false
 
@@ -53,6 +55,10 @@ var cmdStart = &cobra.Command{
 			port = "4242"
 		}
 
+		if tcpFlag {
+			tcpEnabled = true
+		}
+
 		if tlsFlag {
 			tlsEnabled = true
 		}
@@ -65,6 +71,7 @@ var cmdStart = &cobra.Command{
 			ServerTcp: &core.TcpServerConfig{
 				Host:       host,
 				Port:       port,
+				Enabled:    tcpEnabled,
 				TlsEnabled: tlsEnabled,
 			},
 			ServerRpc: &core.RpcServerConfig{

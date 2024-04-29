@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/rpc"
 
+	"github.com/hati-sh/hati/common/logger"
 	"github.com/hati-sh/hati/storage"
 )
 
@@ -50,9 +51,11 @@ func (s *RpcServer) Start() error {
 			io.Copy(w, res)
 		})
 
+		logger.Debug("rpc server listening at: " + s.config.Host + ":" + s.config.Port)
 		if err := http.ListenAndServe(s.config.Host+":"+s.config.Port, nil); err != nil {
 			panic(err)
 		}
+
 	}(s)
 
 	return nil

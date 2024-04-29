@@ -11,7 +11,6 @@ COPY entrypoint.sh /app/entrypoint.sh
 
 RUN make build
 
-EXPOSE 4242
 EXPOSE 6767
 
 ENTRYPOINT ["/hati/entrypoint.sh"]
