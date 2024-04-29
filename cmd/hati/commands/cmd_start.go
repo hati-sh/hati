@@ -100,7 +100,7 @@ var cmdStart = &cobra.Command{
 		for {
 			select {
 			case <-osSignal:
-				fmt.Println("stop signal...")
+				logger.Log("shutting down, wait...")
 
 				hati.Stop()
 
