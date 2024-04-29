@@ -14,7 +14,7 @@ type memoryStorage struct {
 func NewMemoryStorage(ctx context.Context) *memoryStorage {
 	return &memoryStorage{
 		ctx:   ctx,
-		store: newShardMap(common.STORAGE_DEFAULT_NUMBER_OF_SHARDS),
+		store: newMemoryShardMap(common.STORAGE_DEFAULT_NUMBER_OF_SHARDS),
 	}
 }
 

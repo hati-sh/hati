@@ -2,7 +2,6 @@ package core
 
 import (
 	"errors"
-
 	"github.com/hati-sh/hati/storage"
 )
 
@@ -39,7 +38,7 @@ func (s *RpcStorageService) Count(args *CountArgs, reply *int) error {
 		return err
 	}
 
-	count, _ := s.storageManager.Count(storage.Memory)
+	count, _ := s.storageManager.Count(args.Type)
 	*reply = count
 
 	return nil
@@ -55,7 +54,7 @@ func (s *RpcStorageService) Set(args *SetArgs, reply *bool) error {
 	}
 
 	// Fill reply pointer to send the data back
-	if err := s.storageManager.Set(storage.Memory, []byte(args.Key), []byte(args.Value)); err != nil {
+	if err := s.storageManager.Set(args.Type, []byte(args.Key), []byte(args.Value)); err != nil {
 		*reply = false
 
 		return nil
@@ -75,7 +74,7 @@ func (s *RpcStorageService) Get(args *SetArgs, reply *string) error {
 		return errors.New("invalid key")
 	}
 
-	value, err := s.storageManager.Get(storage.Memory, []byte(args.Key))
+	value, err := s.storageManager.Get(args.Type, []byte(args.Key))
 	if err != nil {
 		*reply = err.Error()
 

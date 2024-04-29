@@ -86,6 +86,7 @@ var cmdStart = &cobra.Command{
 				panic(err)
 			}
 		}
+		config.DataDir = dataDir
 
 		ctx := context.Background()
 		hati := core.NewHati(ctx, config)

@@ -29,7 +29,7 @@ func NewHati(ctx context.Context, config *Config) *Hati {
 		stopCtxCancel: stopCtxCancel,
 	}
 
-	hati.storageManager = storage.NewStorageManager(hati.stopCtx)
+	hati.storageManager = storage.NewStorageManager(hati.stopCtx, config.DataDir)
 
 	hati.broker = broker.New(hati.stopCtx)
 

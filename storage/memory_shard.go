@@ -12,7 +12,7 @@ type MemoryShard struct {
 
 type MemoryShardMap []*MemoryShard
 
-func newShardMap(size int) MemoryShardMap {
+func newMemoryShardMap(size int) MemoryShardMap {
 	m := make([]*MemoryShard, size)
 	for i := 0; i < size; i++ {
 		s := MemoryShard{m: make(map[string][]byte)}
