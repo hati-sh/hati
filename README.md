@@ -91,15 +91,21 @@ Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to
 - `Broker.`
 
 ## To do
-**A**
+Below you can find list of features planned to be released in upcoming versions. 
+Please keep in mind that non of these list is a set stone and items can be added/removed 
+but it gives overall image of what are the plans for the near future.
+
+**v1.0.0**
 - [ ] Persistent storage
 - [ ] Implement TTL
 - [ ] Rpc server cancel context for graceful shutdown
 - [ ] CLI command to export/import backup of persistent storage 
 - [ ] Message broker
 
-**B**
-- [ ] Rebuilding persistent database if number of shards has changed
+**v1.1.0**
+- [ ] Rebuilding persistent storage if number of shards has changed
+
+**v1.2.0**
 - [ ] Nodes clustering
 - [ ] Data synchronization between nodes
   - TCP
