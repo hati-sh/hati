@@ -79,10 +79,16 @@ Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to
 - `Broker.`
 
 ## To do
+**A**
 - [ ] Implement `FLUSHALL`: tcp + rpc
 - [ ] Implement TTL
 - [ ] Persistent storage
 - [ ] Rpc server cancel context for graceful shutdown
 - [ ] Message broker
+
+**B**
+- [ ] Rebuilding persistent database if number of shards has changed
 - [ ] Nodes clustering
 - [ ] Data synchronization between nodes
+  - TCP
+  - P2P (? - TBD)
