@@ -69,21 +69,33 @@ Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to
 
 **Storage**
 - `Storage.Set` - set key and value
+  - `type` - storage type: `memory` / `hdd`
+  - `key`
+  - `value`
+  - `ttl`
 - `Storage.Has` - check if provided key exist
+    - `type` - storage type: `memory` / `hdd`
+    - `key`
 - `Storage.Get` - get key
+    - `type` - storage type: `memory` / `hdd`
+    - `key`
 - `Storage.Delete` - delete key
+    - `type` - storage type: `memory` / `hdd`
+    - `key`
 - `Storage.FlushAll` - deletes all keys
+    - `type` - storage type: `memory` / `hdd`
 - `Storage.Count` - returns number of keys
+    - `type` - storage type: `memory` / `hdd`
 
 **Message broker**
 - `Broker.`
 
 ## To do
 **A**
-- [ ] Implement `FLUSHALL`: tcp + rpc
-- [ ] Implement TTL
 - [ ] Persistent storage
+- [ ] Implement TTL
 - [ ] Rpc server cancel context for graceful shutdown
+- [ ] CLI command to export/import backup of persistent storage 
 - [ ] Message broker
 
 **B**
