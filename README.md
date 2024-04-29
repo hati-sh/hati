@@ -109,6 +109,7 @@ but it gives overall image of what are the plans for the near future.
 
 **v1.1.0**
 - [ ] Rebuilding persistent storage if number of shards has changed
+- [ ] TLS support for TCP
 
 **v2.0.0**
 - [ ] Nodes clustering
