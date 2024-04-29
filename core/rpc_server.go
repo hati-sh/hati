@@ -16,17 +16,17 @@ type RpcServerConfig struct {
 }
 
 type RpcServer struct {
-	ctx     context.Context
-	config  *RpcServerConfig
-	storage *storage.Storage
+	ctx            context.Context
+	config         *RpcServerConfig
+	storageManager *storage.StorageManager
 }
 
-func NewRpcServer(ctx context.Context, storage *storage.Storage, config *RpcServerConfig) *RpcServer {
+func NewRpcServer(ctx context.Context, storageManager *storage.StorageManager, config *RpcServerConfig) *RpcServer {
 
 	return &RpcServer{
-		ctx:     ctx,
-		config:  config,
-		storage: storage,
+		ctx:            ctx,
+		config:         config,
+		storageManager: storageManager,
 	}
 }
 
@@ -38,7 +38,7 @@ func (s *RpcServer) Start() error {
 		}
 
 		rpcStorage := new(Storage)
-		rpcStorage.RpcStorageService.storage = s.storage
+		rpcStorage.RpcStorageService.storageManager = s.storageManager
 
 		rpc.Register(rpcStorage)
 

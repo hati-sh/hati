@@ -5,34 +5,34 @@ import (
 	"sync"
 )
 
-type Shard struct {
+type MemoryShard struct {
 	sync.RWMutex
 	m map[string][]byte
 }
 
-type ShardMap []*Shard
+type MemoryShardMap []*MemoryShard
 
-func newShardMap(size int) ShardMap {
-	m := make([]*Shard, size)
+func newShardMap(size int) MemoryShardMap {
+	m := make([]*MemoryShard, size)
 	for i := 0; i < size; i++ {
-		s := Shard{m: make(map[string][]byte)}
+		s := MemoryShard{m: make(map[string][]byte)}
 		m[i] = &s
 	}
 	return m
 }
 
-func (m ShardMap) getShardKey(key string) int {
+func (m MemoryShardMap) getShardKey(key string) int {
 	hash := sha1.Sum([]byte(key))
 	return int(hash[17]) % len(m)
 }
 
-func (m ShardMap) GetShard(key string) *Shard {
+func (m MemoryShardMap) GetShard(key string) *MemoryShard {
 	// mShardMutex ?
 	shardKey := m.getShardKey(key)
 	return m[shardKey]
 }
 
-func (m ShardMap) Get(key string) ([]byte, bool) {
+func (m MemoryShardMap) Get(key string) ([]byte, bool) {
 	shard := m.GetShard(key)
 	shard.RLock()
 	defer shard.RUnlock()
@@ -40,7 +40,7 @@ func (m ShardMap) Get(key string) ([]byte, bool) {
 	return v, ok
 }
 
-func (m ShardMap) Has(key string) bool {
+func (m MemoryShardMap) Has(key string) bool {
 	shard := m.GetShard(key)
 	shard.RLock()
 	defer shard.RUnlock()
@@ -48,18 +48,28 @@ func (m ShardMap) Has(key string) bool {
 	return shard.m[key] != nil
 }
 
-func (m ShardMap) Set(key string, val []byte) {
+func (m MemoryShardMap) Set(key string, val []byte) {
 	shard := m.GetShard(key)
 	shard.Lock()
 	defer shard.Unlock()
 	shard.m[key] = val
 }
 
-func (m ShardMap) Delete(key string) {
+func (m MemoryShardMap) Delete(key string) {
 	shard := m.GetShard(key)
 	shard.Lock()
 	defer shard.Unlock()
 	if _, ok := shard.m[key]; ok {
 		delete(shard.m, key)
 	}
+}
+
+func (m MemoryShardMap) CountKeys() int {
+	var keysCount = 0
+	for _, sm := range m {
+		sm.RLock()
+		keysCount = keysCount + len(sm.m)
+		sm.RUnlock()
+	}
+	return keysCount
 }

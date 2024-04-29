@@ -7,7 +7,7 @@ import (
 )
 
 type RpcStorageService struct {
-	storage *storage.Storage
+	storageManager *storage.StorageManager
 }
 
 type CountArgs struct{}
@@ -22,8 +22,7 @@ type GetArgs struct {
 }
 
 func (s *RpcStorageService) Count(args *CountArgs, reply *int) error {
-	// Fill reply pointer to send the data back
-	count, _ := s.storage.Count(storage.Memory)
+	count, _ := s.storageManager.Count(storage.Memory)
 	*reply = count
 
 	return nil
@@ -35,7 +34,7 @@ func (s *RpcStorageService) Set(args *SetArgs, reply *bool) error {
 	}
 
 	// Fill reply pointer to send the data back
-	if err := s.storage.Set(storage.Memory, []byte(args.Key), []byte(args.Value)); err != nil {
+	if err := s.storageManager.Set(storage.Memory, []byte(args.Key), []byte(args.Value)); err != nil {
 		*reply = false
 
 		return nil
@@ -51,7 +50,7 @@ func (s *RpcStorageService) Get(args *SetArgs, reply *string) error {
 		return errors.New("invalid key")
 	}
 
-	value, err := s.storage.Get(storage.Memory, []byte(args.Key))
+	value, err := s.storageManager.Get(storage.Memory, []byte(args.Key))
 	if err != nil {
 		*reply = err.Error()
 

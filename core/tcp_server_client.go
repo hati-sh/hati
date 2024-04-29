@@ -8,6 +8,7 @@ import (
 	"net"
 	"sync"
 
+	"github.com/hati-sh/hati/common"
 	"github.com/hati-sh/hati/common/logger"
 )
 
@@ -32,7 +33,7 @@ func NewTcpServerClient(ctx context.Context, stopWg *sync.WaitGroup, clientStopp
 		ctxStopCancel:              ctxStopCancel,
 		conn:                       conn,
 		stopWg:                     stopWg,
-		payloads:                   make(chan []byte, TCP_PAYLOAD_HANDLER_CHAN_SIZE),
+		payloads:                   make(chan []byte, common.TCP_PAYLOAD_HANDLER_CHAN_SIZE),
 		stopProcessingPayloadsChan: make(chan bool),
 		payloadHandler:             payloadHandler,
 		clientStoppedChan:          clientStoppedChan,
@@ -94,7 +95,7 @@ func (c *TcpServerClient) scanForIncomingBytes() {
 		payload := scanner.Bytes()
 		response, err := c.payloadHandler(payload)
 		if err != nil {
-			if _, err := c.conn.Write([]byte(err.Error())); err != nil {
+			if _, err := c.conn.Write([]byte(err.Error() + "\n")); err != nil {
 				logger.Error(err)
 
 				break

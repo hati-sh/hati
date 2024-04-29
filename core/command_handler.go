@@ -10,9 +10,9 @@ import (
 )
 
 type CommandHandler struct {
-	ctx     context.Context
-	storage *storage.Storage
-	broker  *broker.Broker
+	ctx            context.Context
+	storageManager *storage.StorageManager
+	broker         *broker.Broker
 }
 
 func (ch *CommandHandler) processPayload(payload []byte) ([]byte, error) {
@@ -50,7 +50,7 @@ func (ch *CommandHandler) set(payloadArr [][]byte) ([]byte, error) {
 	key := payloadArr[3]
 	value := bytes.Join(payloadArr[4:], []byte(" "))
 
-	if err := ch.storage.Set(storage.Memory, key, value); err != nil {
+	if err := ch.storageManager.Set(storage.Memory, key, value); err != nil {
 		return nil, err
 	}
 
@@ -58,9 +58,11 @@ func (ch *CommandHandler) set(payloadArr [][]byte) ([]byte, error) {
 }
 
 func (ch *CommandHandler) get(payloadArr [][]byte) ([]byte, error) {
+	// storageType := payloadArr[1]
+
 	key := payloadArr[2]
 
-	value, err := ch.storage.Memory.Get(key)
+	value, err := ch.storageManager.Get(storage.Memory, key)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +74,7 @@ func (ch *CommandHandler) get(payloadArr [][]byte) ([]byte, error) {
 func (ch *CommandHandler) has(payloadArr [][]byte) bool {
 	key := payloadArr[2]
 
-	has := ch.storage.Memory.Has(key)
+	has := ch.storageManager.Has(storage.Memory, key)
 
 	return has
 }
@@ -80,5 +82,5 @@ func (ch *CommandHandler) has(payloadArr [][]byte) bool {
 func (ch *CommandHandler) delete(payloadArr [][]byte) {
 	key := payloadArr[2]
 
-	ch.storage.Memory.Delete(key)
+	ch.storageManager.Delete(storage.Memory, key)
 }

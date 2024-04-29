@@ -1,32 +1,28 @@
 package storage
 
 import (
-	"errors"
+	"context"
+
+	"github.com/hati-sh/hati/common"
 )
 
-var ErrKeyNotExist = errors.New("KEY_NOT_EXIST\n")
-
 type memoryStorage struct {
-	store ShardMap
+	ctx   context.Context
+	store MemoryShardMap
 }
 
-func NewMemoryStorage() *memoryStorage {
+func NewMemoryStorage(ctx context.Context) *memoryStorage {
 	return &memoryStorage{
-		store: newShardMap(DEFAULT_NUMBER_OF_SHARDS),
+		ctx:   ctx,
+		store: newShardMap(common.STORAGE_DEFAULT_NUMBER_OF_SHARDS),
 	}
 }
 
 func (s *memoryStorage) CountKeys() int {
-	var keysCount = 0
-
-	for _, sm := range s.store {
-		keysCount = keysCount + len(sm.m)
-	}
-	return keysCount
+	return s.store.CountKeys()
 }
 
 func (s *memoryStorage) Has(key []byte) bool {
-
 	return s.store.Has(string(key))
 }
 

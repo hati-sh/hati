@@ -12,8 +12,6 @@ import (
 	"github.com/hati-sh/hati/common/logger"
 )
 
-const TCP_PAYLOAD_HANDLER_CHAN_SIZE = 2000000
-
 type PayloadHandler func(payload []byte) ([]byte, error)
 
 type tcpKeepAliveListener struct {

@@ -16,8 +16,8 @@ type Hati struct {
 	tcpServer      *TcpServer
 	rpcServer      *RpcServer
 	commandHandler CommandHandler
-	storage        storage.Storage
 	broker         broker.Broker
+	storageManager *storage.StorageManager
 }
 
 func NewHati(ctx context.Context, config *Config) *Hati {
@@ -29,17 +29,17 @@ func NewHati(ctx context.Context, config *Config) *Hati {
 		stopCtxCancel: stopCtxCancel,
 	}
 
-	hati.storage = storage.New(hati.stopCtx)
+	hati.storageManager = storage.NewStorageManager(hati.stopCtx)
+
 	hati.broker = broker.New(hati.stopCtx)
 
 	hati.commandHandler = CommandHandler{
-		ctx:     hati.stopCtx,
-		storage: &hati.storage,
-		broker:  &hati.broker,
+		ctx:    hati.stopCtx,
+		broker: &hati.broker,
 	}
 
 	hati.tcpServer = NewTcpServer(hati.stopCtx, config.ServerTcp, hati.commandHandler.processPayload)
-	hati.rpcServer = NewRpcServer(hati.stopCtx, &hati.storage, config.ServerRpc)
+	hati.rpcServer = NewRpcServer(hati.stopCtx, hati.storageManager, config.ServerRpc)
 
 	return hati
 }
