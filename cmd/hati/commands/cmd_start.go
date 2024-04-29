@@ -72,7 +72,20 @@ var cmdStart = &cobra.Command{
 			},
 		}
 
-		fmt.Printf("dataDir: %s\n\n", dataDir)
+		if dataDir == "" {
+			dataDir = common.DEFAULT_DATA_DIR
+		}
+
+		if _, err := os.Stat(dataDir); err != nil {
+			if os.IsNotExist(err) {
+				err := os.MkdirAll(dataDir, 0644)
+				if err != nil {
+					panic(err)
+				}
+			} else {
+				panic(err)
+			}
+		}
 
 		ctx := context.Background()
 		hati := core.NewHati(ctx, config)
