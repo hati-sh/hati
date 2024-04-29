@@ -38,9 +38,10 @@ Once connected as a client to Hati server you can publish commands which will be
 
 While starting Hati `hati start` there are configurational flags available to be set.
 
-- `--host` - determines bind host for TCP server, default value is `0.0.0.0`
-- `--port` - bind port for TCP server, default value is `4242`
-- `--rpc` - indicates if should start JSON-RPC server, default `off`
+- `--tcp` - indicates if should start TCP server, by default it is off
+- `--tcp-host` - determines bind host for TCP server, default value is `0.0.0.0`
+- `--tcp-port` - bind port for TCP server, default value is `4242`
+- `--rpc` - indicates if should start JSON-RPC server, by default it is off 
 - `--rpc-host` - bind host for JSON-RPC server, default `0.0.0.0`
 - `--rpc-port` - bind port for JSON-RPC server, default `6666`
 - `--data-dir` - absolute path to directory where Hati can store files, default `/current/path/to-hati/data`
@@ -66,6 +67,7 @@ Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to
 
 ## JSON-RPC Methods
 
+**Storage**
 - `Storage.Set` - set key and value
 - `Storage.Has` - check if provided key exist
 - `Storage.Get` - get key
@@ -73,8 +75,11 @@ Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to
 - `Storage.FlushAll` - deletes all keys
 - `Storage.Count` - returns number of keys
 
-## To do
+**Message broker**
+- `Broker.`
 
+## To do
+- [ ] Implement `FLUSHALL`: tcp + rpc
 - [ ] Implement TTL
 - [ ] Persistent storage
 - [ ] Message broker
