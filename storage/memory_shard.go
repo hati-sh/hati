@@ -27,7 +27,6 @@ func (m MemoryShardMap) getShardKey(key string) int {
 }
 
 func (m MemoryShardMap) GetShard(key string) *MemoryShard {
-	// mShardMutex ?
 	shardKey := m.getShardKey(key)
 	return m[shardKey]
 }
