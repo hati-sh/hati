@@ -33,6 +33,7 @@ Once connected as a client to Hati server you can publish commands which will be
 - TCP server
 - JSON-RPC server
 - Storing data in in-memory storage type - with sharding
+- Storing data in hdd
 
 ## Configuration
 
@@ -96,9 +97,8 @@ Please keep in mind that non of these list is a set stone and items can be added
 but it gives overall image of what are the plans for the near future.
 
 **v1.0.0**
-- [ ] Persistent storage
-- [ ] Implement TTL
 - [ ] Rpc server cancel context for graceful shutdown
+- [ ] Implement TTL
 - [ ] CLI command to export/import backup of persistent storage 
 - [ ] Message broker
 
