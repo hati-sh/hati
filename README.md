@@ -101,6 +101,11 @@ but it gives overall image of what are the plans for the near future.
 - [ ] Implement TTL
 - [ ] CLI command to export/import backup of persistent storage 
 - [ ] Message broker
+- [ ] Command to return server statistics 
+  - Number of keys for each storage type
+  - Number of keys in each shard
+  - Active TCP connections
+  - Message broker statistics
 
 **v1.1.0**
 - [ ] Rebuilding persistent storage if number of shards has changed
