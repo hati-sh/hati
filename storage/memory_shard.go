@@ -59,9 +59,8 @@ func (m MemoryShardMap) Delete(key string) {
 	shard := m.GetShard(key)
 	shard.Lock()
 	defer shard.Unlock()
-	if _, ok := shard.m[key]; ok {
-		delete(shard.m, key)
-	}
+
+	delete(shard.m, key)
 }
 
 func (m MemoryShardMap) CountKeys() int {
