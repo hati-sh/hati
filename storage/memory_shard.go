@@ -63,6 +63,17 @@ func (m MemoryShardMap) Delete(key string) {
 	delete(shard.m, key)
 }
 
+func (m MemoryShardMap) FlushAll() bool {
+	// go shard by shard and delete data
+	for _, shard := range m {
+		shard.Lock()
+		shard.m = make(map[string][]byte)
+		shard.Unlock()
+	}
+
+	return true
+}
+
 func (m MemoryShardMap) CountKeys() int {
 	var keysCount = 0
 	for _, sm := range m {

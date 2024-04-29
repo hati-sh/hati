@@ -72,3 +72,14 @@ func (s *StorageManager) Delete(storageType Type, key []byte) bool {
 		return false
 	}
 }
+
+func (s *StorageManager) FlushAll(storageType Type) bool {
+	switch storageType {
+	case Memory:
+		return s.memory.FlushAll()
+	case Hdd:
+		return false
+	default:
+		return false
+	}
+}

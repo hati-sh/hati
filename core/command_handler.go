@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-
 	"github.com/hati-sh/hati/broker"
 	"github.com/hati-sh/hati/storage"
 )
@@ -33,7 +32,9 @@ func (ch *CommandHandler) processPayload(payload []byte) ([]byte, error) {
 		return nil, errors.New(string(CmdErr))
 	} else if bytes.Equal(payloadArr[0], CmdDelete) {
 		ch.delete(payloadArr)
-
+		return CmdOk, nil
+	} else if bytes.Equal(payloadArr[0], CmdFlushAll) {
+		ch.flushAll(payloadArr)
 		return CmdOk, nil
 	}
 
@@ -83,4 +84,9 @@ func (ch *CommandHandler) delete(payloadArr [][]byte) {
 	key := payloadArr[2]
 
 	ch.storageManager.Delete(storage.Memory, key)
+}
+
+func (ch *CommandHandler) flushAll(payloadArr [][]byte) {
+	//storageType := payloadArr[1]
+	ch.storageManager.FlushAll(storage.Memory)
 }

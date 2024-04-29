@@ -36,7 +36,6 @@ func NewClientTcp(host string, port string, tlsEnabled bool) (ClientTcp, error) 
 
 func (s ClientTcp) Connect() error {
 	// config := tls.Config{InsecureSkipVerify: true, Certificates: []tls.Certificate{s.tlsCertificate}}
-
 	// state := conn.ConnectionState()
 	// for _, v := range state.PeerCertificates {
 	// 	fmt.Println(x509.MarshalPKIXPublicKey(v.PublicKey))
@@ -75,7 +74,7 @@ func (s ClientTcp) Connect() error {
 			writer := bufio.NewWriter(conn)
 			rc := 0
 			timeStart := time.Now()
-			for i := 0; i < 1; i++ {
+			for i := 0; i < 10000; i++ {
 				key := uuid.New()
 
 				_, err := writer.Write([]byte("SET memory 0 " + key.String() + " value1 dziala\n"))
