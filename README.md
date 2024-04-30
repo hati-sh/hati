@@ -104,8 +104,16 @@ but it gives overall image of what are the plans for the near future.
 
 **v1.0.0**
 
-- [ ] Rpc server cancel context for graceful shutdown
-- [ ] Graceful shutdown of LevelDB
+- [x] Configuration options via CLI flags
+- [x] Memory and persistent (LevelDB) key-value storage
+- [X] TCP server
+- [x] JSON-RPC server 
+- [x] TCP and JSON-RPC commands:
+  - [x] `SET`, `GET`, `HAS`, `DELETE`, `FLUSHALL`, `COUNT`
+  - [ ] `CREATEROUTER`, `CREATEQUEUE`, `PUBLISH`, `ACK`, `GETROUTER`, `GETQUEUE`, `LISTROUTER`, `LISTQUEUE`, `FLUSH`
+- [x] TCP server cancel context for graceful shutdown
+- [x] RPC server cancel context for graceful shutdown
+- [ ] Graceful shutdown of HDD storage
 - [ ] Implement TTL
 - [ ] CLI command to export/import backup of persistent storage
 - [ ] Message broker
