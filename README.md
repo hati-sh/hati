@@ -122,6 +122,7 @@ but it gives overall image of what are the plans for the near future.
   - Number of keys in each shard
   - Active TCP connections
   - Message broker statistics
+- [ ] Communication via UNIX socket
 - [ ] Access protected by credentials
 
 **v1.1.0**
