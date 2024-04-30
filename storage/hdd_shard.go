@@ -17,6 +17,7 @@ type HddShardMap []*HddShard
 type HddShard struct {
 	db      *leveldb.DB
 	dataDir string
+	counter int
 	sync.RWMutex
 }
 
@@ -87,6 +88,15 @@ func (m HddShardMap) Has(key string) bool {
 func (m HddShardMap) Set(key string, value []byte) bool {
 	shard := m.GetShard(key)
 
+	_, err := shard.db.Get([]byte(key), nil)
+	if err != nil {
+		if errors.Is(err, leveldb.ErrNotFound) {
+			shard.Lock()
+			shard.counter++
+			shard.Unlock()
+		}
+	}
+
 	if err := shard.db.Put([]byte(key), value, nil); err != nil {
 		logger.Error(err.Error())
 		return false
@@ -104,6 +114,13 @@ func (m HddShardMap) Delete(key string) bool {
 		logger.Error(err.Error())
 		return false
 	}
+
+	if shard.counter > 0 {
+		shard.Lock()
+		shard.counter--
+		shard.Unlock()
+	}
+
 	return true
 }
 
@@ -119,11 +136,13 @@ func (m HddShardMap) FlushAll() (bool, error) {
 			logger.Error(err.Error())
 			return false, err
 		}
+		m[i].counter = 0
 
 		m[i].db, err = leveldb.OpenFile(dbPath, hddWriteOptions)
 		if err != nil {
 			panic(err)
 		}
+
 		m[i].Unlock()
 	}
 
@@ -133,10 +152,9 @@ func (m HddShardMap) FlushAll() (bool, error) {
 func (m HddShardMap) CountKeys() int {
 	var keysCount = 0
 	for _, shard := range m {
-		iter := shard.db.NewIterator(nil, nil)
-		for iter.Next() {
-			keysCount++
-		}
+		shard.RLock()
+		keysCount = keysCount + shard.counter
+		shard.RUnlock()
 	}
 
 	return keysCount
