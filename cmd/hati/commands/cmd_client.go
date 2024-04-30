@@ -11,12 +11,12 @@ var cmdClient = &cobra.Command{
 	Long:  `Connect to hati server, provide server address eg: localhost:4242`,
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		host, _ := cmd.Flags().GetString("host")
-		port, _ := cmd.Flags().GetString("port")
-		tlsFlag, _ := cmd.Flags().GetString("tls")
+		host, _ := cmd.Flags().GetString("tcp-host")
+		port, _ := cmd.Flags().GetString("tcp-port")
+		tlsFlag, _ := cmd.Flags().GetBool("tcp-tls")
 
 		tlsEnabled := false
-		if tlsFlag == "on" {
+		if tlsFlag {
 			tlsEnabled = true
 		}
 
