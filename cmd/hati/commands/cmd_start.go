@@ -78,7 +78,7 @@ var cmdStart = &cobra.Command{
 
 		if _, err := os.Stat(dataDir); err != nil {
 			if os.IsNotExist(err) {
-				err := os.MkdirAll(dataDir, 0644)
+				err := os.MkdirAll(dataDir, 0744)
 				if err != nil {
 					panic(err)
 				}
