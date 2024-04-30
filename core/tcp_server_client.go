@@ -77,8 +77,8 @@ func (c *TcpServerClient) scanForIncomingBytes() {
 	defer c.stopWg.Done()
 
 	scanner := bufio.NewScanner(c.conn)
-	buf := make([]byte, 0, 1024*1024*8)
-	scanner.Buffer(buf, 1024*1024*512)
+	buf := make([]byte, 0, common.TCP_READ_BUFFER_INIT)
+	scanner.Buffer(buf, common.TCP_READ_BUFFER_MAX)
 
 	for {
 		ok := scanner.Scan()
