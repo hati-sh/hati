@@ -12,8 +12,6 @@ import (
 	"github.com/hati-sh/hati/common/logger"
 )
 
-const TCP_PAYLOAD_HANDLER_CHAN_SIZE = 2000000
-
 type PayloadHandler func(payload []byte) ([]byte, error)
 
 type tcpKeepAliveListener struct {
@@ -33,6 +31,7 @@ func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
 type TcpServerConfig struct {
 	Host       string
 	Port       string
+	Enabled    bool
 	TlsEnabled bool
 }
 
@@ -50,9 +49,13 @@ type TcpServer struct {
 	clientStoppedChan chan net.Conn
 }
 
-func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler PayloadHandler) TcpServer {
+func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler PayloadHandler) *TcpServer {
 	var cert tls.Certificate
 	var err error
+
+	if !config.Enabled {
+		return &TcpServer{ctx: ctx, config: config, payloadHandler: payloadHandler}
+	}
 
 	if config.TlsEnabled {
 		cert, err = common.GenX509KeyPair()
@@ -62,7 +65,7 @@ func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler P
 		}
 	}
 
-	return TcpServer{
+	return &TcpServer{
 		ctx:               ctx,
 		config:            config,
 		tlsCertificate:    cert,
@@ -75,6 +78,10 @@ func NewTcpServer(ctx context.Context, config *TcpServerConfig, payloadHandler P
 }
 
 func (s *TcpServer) Start() error {
+	if !s.config.Enabled {
+		return nil
+	}
+
 	go s.daemon(s.stopChan)
 
 	var err error
@@ -83,6 +90,7 @@ func (s *TcpServer) Start() error {
 	if err != nil {
 		return err
 	}
+	logger.Debug("tcp listening at: " + fmt.Sprintf("%s:%s", s.config.Host, s.config.Port))
 
 	if s.config.TlsEnabled {
 		config := &tls.Config{}
@@ -98,6 +106,10 @@ func (s *TcpServer) Start() error {
 }
 
 func (s *TcpServer) Stop() {
+	if !s.config.Enabled {
+		return
+	}
+
 	s.stopChan <- true
 
 	s.stopWg.Wait()
@@ -105,6 +117,10 @@ func (s *TcpServer) Stop() {
 }
 
 func (s *TcpServer) WaitForStop() {
+	if !s.config.Enabled {
+		return
+	}
+
 	s.stopWg.Wait()
 	logger.Debug("tcpServer WaitForStop")
 }

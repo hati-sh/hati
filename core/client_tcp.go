@@ -5,10 +5,12 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"fmt"
+	"github.com/google/uuid"
+	"github.com/hati-sh/hati/common"
 	"log"
 	"net"
-
-	"github.com/hati-sh/hati/common"
+	"sync"
+	"time"
 )
 
 type ClientTcp struct {
@@ -34,16 +36,6 @@ func NewClientTcp(host string, port string, tlsEnabled bool) (ClientTcp, error) 
 
 func (s ClientTcp) Connect() error {
 	// config := tls.Config{InsecureSkipVerify: true, Certificates: []tls.Certificate{s.tlsCertificate}}
-	config := tls.Config{}
-	config.Rand = rand.Reader
-
-	conn, err := net.Dial("tcp", s.host+":"+s.port)
-	if err != nil {
-		log.Fatalf("client: dial: %s", err)
-	}
-	defer conn.Close()
-	log.Println("client: connected to: ", conn.RemoteAddr())
-
 	// state := conn.ConnectionState()
 	// for _, v := range state.PeerCertificates {
 	// 	fmt.Println(x509.MarshalPKIXPublicKey(v.PublicKey))
@@ -61,34 +53,59 @@ func (s ClientTcp) Connect() error {
 	// fmt.Println(msgBytes)
 	// fmt.Println(string(msgBytes))
 	// msgBytes
+	var wg sync.WaitGroup
 
-	writer := bufio.NewWriter(conn)
+	x := 0
 
-	rc := 0
+	for ; x < 1; x++ {
+		wg.Add(1)
 
-	for i := 0; i < 1000; i++ {
-		_, err := writer.Write([]byte("dziala!!!\n"))
-		if err != nil {
-			log.Fatalf("client: write: %s", err)
-		}
-		writer.Flush()
+		go func(wg *sync.WaitGroup) {
+			config := tls.Config{}
+			config.Rand = rand.Reader
 
-		// log.Printf("client: wrote %q (%d bytes)", string(msgBytes), n)
+			conn, err := net.Dial("tcp", s.host+":"+s.port)
+			if err != nil {
+				log.Fatalf("client: dial: %s", err)
+			}
+			defer conn.Close()
+			log.Println("client: connected to: ", conn.RemoteAddr())
 
-		reply := make([]byte, 256)
-		n, err := conn.Read(reply)
-		if err != nil {
-			log.Fatal(err)
-		}
+			writer := bufio.NewWriter(conn)
+			rc := 0
+			timeStart := time.Now()
+			for i := 0; i < 100000; i++ {
+				key := uuid.New()
 
-		if n > 0 {
-			rc++
-		}
-		// log.Printf("client: read %q (%d bytes)", string(reply[:n]), n)
-		// log.Print("client: exiting")
+				_, err := writer.Write([]byte("SET hdd 0 " + key.String() + " value1 dziala " + key.String() + "\n"))
+				if err != nil {
+					log.Fatalf("client: write: %s", err)
+				}
+				writer.Flush()
+
+				// log.Printf("client: wrote %q (%d bytes)", string(msgBytes), n)
+
+				reply := make([]byte, 256)
+				n, err := conn.Read(reply)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				if n > 0 {
+					rc++
+				}
+				// log.Printf("client: read %q (%d bytes)", string(reply[:n]), n)
+				// log.Print("client: exiting")
+			}
+			timeEnd := time.Now()
+			timeDiff := timeEnd.Sub(timeStart)
+			fmt.Println(rc)
+			fmt.Println(timeDiff.String())
+			wg.Done()
+		}(&wg)
 	}
 
-	fmt.Println(rc)
+	wg.Wait()
 
 	return nil
 }

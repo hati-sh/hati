@@ -1,6 +1,6 @@
 # @hatish/hati
 
-`v0.1.0-dev`
+`v0.2.0-dev`
 
 ```
 IN DEVELOPMENT. DO NOT USE IN PRODUCTION.
@@ -12,58 +12,118 @@ Hati is meant to work in trusted networks - where all nodes operators know each 
 
 Once connected as a client to Hati server you can publish commands which will be processed by the server and published over the Hati network - Hati nodes can be connected to each other creating network of nodes but it is prefectly fine to run Hati as a single instance.
 
+**Current version**
 ```
-  [req]      [req]      [req]
-    ^          ^          ^
-    v          v          v
-[London] [Hong Kong] [New York]
+[req] [req]  
+  ^     ^
+  v     v
+[Hong Kong]
+```
+
+**v2.0.0**
+```
+[req][req] [req][req] [req][req]
+    ^          ^           ^
+    v          v           v
+[London]  [Hong Kong] [New York]
     ^          ^          ^
     |----------|----------|
 ```
 
-```
-  [req]
-    ^
-    v
-[Hong Kong]
-```
 
 ## Current features
 
-- TCP Server
-- Storing data in in-memory storage type
+- TCP server
+- JSON-RPC server
+- Storing data in in-memory storage type - with sharding
+- Storing data in hdd
 
 ## Configuration
 
 While starting Hati `hati start` there are configurational flags available to be set.
 
-- `--host` - determines bind host for TCP server, default value is `0.0.0.0`
-- `--port` - bind port for TCP server, default value is `4242`
-- `--data-dir` - absolute path to directory where Hati can store files
-- `--cpu` - amount of CPU cores which should be used by Hati, by default it will set for as many as available
+- `--tcp` - indicates if should start TCP server, by default it is off
+- `--tcp-host` - determines bind host for TCP server, default value is `0.0.0.0`
+- `--tcp-port` - bind port for TCP server, default value is `4242`
+- `--rpc` - indicates if should start JSON-RPC server, by default it is off
+- `--rpc-host` - bind host for JSON-RPC server, default `0.0.0.0`
+- `--rpc-port` - bind port for JSON-RPC server, default `6666`
+- `--data-dir` - absolute path to directory where Hati can store files, default `/current/path/to-hati/data`
+- `--cpu-num` - number of CPU cores which should be used by Hati, by default it will set for as many as available
 
-## Commands
+## Protocol Commands
 
 ### Key-Value Storage
 
-`SET <type> <ttl> <key> <value>` - save key with provided value to the selected storage type.
+`SET <type> <ttl> <key> <value>\n` - save key with provided value to the selected storage type.
 
 Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to zero `0` which means that value will be stored on the hard-drive. Ttl value is in ms, if higher than `0` Hati can guarantee that value will be stored at minimum for provided ttl value and will be removed from the storage shortly (as soon as possible) after that.
 
-**^^ TTL IS NOT IMPLEMENTED YET ^^**
+**^^ TTL IS NOT IMPLEMENTED YET BUT HAVE TO BE INCLUDED IN THE COMMAND - IT JUST HAVE NO EFFECT AS OF THIS MOMENT^^**
 
-`HAS <type> <key>` - check if provided key exist in given storage type
+`HAS <type> <key>\n` - check if provided key exist in given storage type
 
-`GET <type> <key>` - get value for provided key in given storage type
+`GET <type> <key>\n` - get value for provided key in given storage type
 
-`DELETE <type> <key>` - get value for provided key in given storage type
+`DELETE <type> <key>\n` - get value for provided key in given storage type
 
-`FLUSHALL <type>` - flush (delete) all data from given storage type
+`FLUSHALL <type>\n` - flush (delete) all data from given storage type
+
+## JSON-RPC Methods
+
+**Storage**
+
+- `Storage.Set` - set key and value
+  - `type` - storage type: `memory` / `hdd`
+  - `key`
+  - `value`
+  - `ttl`
+- `Storage.Has` - check if provided key exist
+  - `type` - storage type: `memory` / `hdd`
+  - `key`
+- `Storage.Get` - get key
+  - `type` - storage type: `memory` / `hdd`
+  - `key`
+- `Storage.Delete` - delete key
+  - `type` - storage type: `memory` / `hdd`
+  - `key`
+- `Storage.FlushAll` - deletes all keys
+  - `type` - storage type: `memory` / `hdd`
+- `Storage.Count` - returns number of keys
+  - `type` - storage type: `memory` / `hdd`
+
+**Message broker**
+
+- `Broker.`
 
 ## To do
 
+Below you can find list of features planned to be released in upcoming versions.
+Please keep in mind that non of these list is a set stone and items can be added/removed
+but it gives overall image of what are the plans for the near future.
+
+**v1.0.0**
+
+- [ ] Rpc server cancel context for graceful shutdown
+- [ ] Graceful shutdown of LevelDB
 - [ ] Implement TTL
-- [ ] Persistent storage
+- [ ] CLI command to export/import backup of persistent storage
 - [ ] Message broker
+- [ ] Command to return server statistics
+  - Number of keys for each storage type
+  - Number of keys in each shard
+  - Active TCP connections
+  - Message broker statistics
+- [ ] Access protected by credentials
+
+**v1.1.0**
+
+- [ ] Rebuilding persistent storage if number of shards has changed
+- [ ] TLS support for TCP
+
+**v2.0.0**
+
 - [ ] Nodes clustering
 - [ ] Data synchronization between nodes
+  - TCP
+  - P2P (? - TBD)

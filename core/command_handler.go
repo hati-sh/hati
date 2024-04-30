@@ -4,15 +4,14 @@ import (
 	"bytes"
 	"context"
 	"errors"
-
 	"github.com/hati-sh/hati/broker"
 	"github.com/hati-sh/hati/storage"
 )
 
 type CommandHandler struct {
-	ctx     context.Context
-	storage *storage.Storage
-	broker  *broker.Broker
+	ctx            context.Context
+	storageManager *storage.Manager
+	broker         *broker.Broker
 }
 
 func (ch *CommandHandler) processPayload(payload []byte) ([]byte, error) {
@@ -33,7 +32,9 @@ func (ch *CommandHandler) processPayload(payload []byte) ([]byte, error) {
 		return nil, errors.New(string(CmdErr))
 	} else if bytes.Equal(payloadArr[0], CmdDelete) {
 		ch.delete(payloadArr)
-
+		return CmdOk, nil
+	} else if bytes.Equal(payloadArr[0], CmdFlushAll) {
+		ch.flushAll(payloadArr)
 		return CmdOk, nil
 	}
 
@@ -41,10 +42,17 @@ func (ch *CommandHandler) processPayload(payload []byte) ([]byte, error) {
 }
 
 func (ch *CommandHandler) set(payloadArr [][]byte) ([]byte, error) {
-	key := payloadArr[2]
-	value := bytes.Join(payloadArr[3:], []byte(" "))
+	storageType := storage.Type(payloadArr[1])
 
-	if err := ch.storage.Set(storage.Memory, key, value); err != nil {
+	//ttl := payloadArr[2]
+	if len(payloadArr) < 5 {
+		return nil, errors.New(string(CmdErr))
+	}
+
+	key := payloadArr[3]
+	value := bytes.Join(payloadArr[4:], []byte(" "))
+
+	if err := ch.storageManager.Set(storageType, key, value); err != nil {
 		return nil, err
 	}
 
@@ -52,9 +60,10 @@ func (ch *CommandHandler) set(payloadArr [][]byte) ([]byte, error) {
 }
 
 func (ch *CommandHandler) get(payloadArr [][]byte) ([]byte, error) {
+	storageType := storage.Type(payloadArr[1])
 	key := payloadArr[2]
 
-	value, err := ch.storage.Memory.Get(key)
+	value, err := ch.storageManager.Get(storageType, key)
 	if err != nil {
 		return nil, err
 	}
@@ -64,15 +73,22 @@ func (ch *CommandHandler) get(payloadArr [][]byte) ([]byte, error) {
 }
 
 func (ch *CommandHandler) has(payloadArr [][]byte) bool {
+	storageType := storage.Type(payloadArr[1])
 	key := payloadArr[2]
 
-	has := ch.storage.Memory.Has(key)
+	has := ch.storageManager.Has(storageType, key)
 
 	return has
 }
 
 func (ch *CommandHandler) delete(payloadArr [][]byte) {
+	storageType := storage.Type(payloadArr[1])
 	key := payloadArr[2]
 
-	ch.storage.Memory.Delete(key)
+	ch.storageManager.Delete(storageType, key)
+}
+
+func (ch *CommandHandler) flushAll(payloadArr [][]byte) {
+	storageType := storage.Type(payloadArr[1])
+	ch.storageManager.FlushAll(storageType)
 }
