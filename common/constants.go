@@ -1,6 +1,6 @@
 package common
 
-const VERSION = "0.2.0-dev"
+const VERSION = "0.3.0-dev"
 
 const DEFAULT_DATA_DIR = "./data"
 const DEFAULT_TCP_BIND_HOST = "0.0.0.0"

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/hati-sh/hati/common/logger"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/opt"
 	"path"
 	"strconv"
 )
@@ -19,11 +20,15 @@ func newHddShardMap(size int, dataDir string) HddShardMap {
 	var err error
 	m := make([]*HddShard, size)
 
+	options := &opt.Options{
+		WriteBuffer: 1024 * 1024 * 16,
+	}
+
 	for i := 0; i < size; i++ {
 		m[i] = &HddShard{db: nil}
 
 		dbPath := path.Join(dataDir, "db", "kv_shard_"+strconv.Itoa(i))
-		m[i].db, err = leveldb.OpenFile(dbPath, nil)
+		m[i].db, err = leveldb.OpenFile(dbPath, options)
 		if err != nil {
 			panic(err)
 		}

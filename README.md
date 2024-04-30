@@ -1,4 +1,4 @@
-# @hatish/hati
+# Hati
 
 `v0.2.0-dev`
 
