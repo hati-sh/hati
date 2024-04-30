@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"math"
 	"net"
 	"sync"
 
@@ -78,8 +77,8 @@ func (c *TcpServerClient) scanForIncomingBytes() {
 	defer c.stopWg.Done()
 
 	scanner := bufio.NewScanner(c.conn)
-	buf := make([]byte, 0, 1<<20)
-	scanner.Buffer(buf, math.MaxInt)
+	buf := make([]byte, 0, 1024*1024*8)
+	scanner.Buffer(buf, 1024*1024*512)
 
 	for {
 		ok := scanner.Scan()
