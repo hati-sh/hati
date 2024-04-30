@@ -42,7 +42,7 @@ While starting Hati `hati start` there are configurational flags available to be
 - `--tcp` - indicates if should start TCP server, by default it is off
 - `--tcp-host` - determines bind host for TCP server, default value is `0.0.0.0`
 - `--tcp-port` - bind port for TCP server, default value is `4242`
-- `--rpc` - indicates if should start JSON-RPC server, by default it is off 
+- `--rpc` - indicates if should start JSON-RPC server, by default it is off
 - `--rpc-host` - bind host for JSON-RPC server, default `0.0.0.0`
 - `--rpc-port` - bind port for JSON-RPC server, default `6666`
 - `--data-dir` - absolute path to directory where Hati can store files, default `/current/path/to-hati/data`
@@ -69,50 +69,57 @@ Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to
 ## JSON-RPC Methods
 
 **Storage**
+
 - `Storage.Set` - set key and value
   - `type` - storage type: `memory` / `hdd`
   - `key`
   - `value`
   - `ttl`
 - `Storage.Has` - check if provided key exist
-    - `type` - storage type: `memory` / `hdd`
-    - `key`
+  - `type` - storage type: `memory` / `hdd`
+  - `key`
 - `Storage.Get` - get key
-    - `type` - storage type: `memory` / `hdd`
-    - `key`
+  - `type` - storage type: `memory` / `hdd`
+  - `key`
 - `Storage.Delete` - delete key
-    - `type` - storage type: `memory` / `hdd`
-    - `key`
+  - `type` - storage type: `memory` / `hdd`
+  - `key`
 - `Storage.FlushAll` - deletes all keys
-    - `type` - storage type: `memory` / `hdd`
+  - `type` - storage type: `memory` / `hdd`
 - `Storage.Count` - returns number of keys
-    - `type` - storage type: `memory` / `hdd`
+  - `type` - storage type: `memory` / `hdd`
 
 **Message broker**
+
 - `Broker.`
 
 ## To do
-Below you can find list of features planned to be released in upcoming versions. 
-Please keep in mind that non of these list is a set stone and items can be added/removed 
+
+Below you can find list of features planned to be released in upcoming versions.
+Please keep in mind that non of these list is a set stone and items can be added/removed
 but it gives overall image of what are the plans for the near future.
 
 **v1.0.0**
+
 - [ ] Rpc server cancel context for graceful shutdown
 - [ ] Graceful shutdown of LevelDB
 - [ ] Implement TTL
-- [ ] CLI command to export/import backup of persistent storage 
+- [ ] CLI command to export/import backup of persistent storage
 - [ ] Message broker
-- [ ] Command to return server statistics 
+- [ ] Command to return server statistics
   - Number of keys for each storage type
   - Number of keys in each shard
   - Active TCP connections
   - Message broker statistics
+- [ ] Access protected by credentials
 
 **v1.1.0**
+
 - [ ] Rebuilding persistent storage if number of shards has changed
 - [ ] TLS support for TCP
 
 **v2.0.0**
+
 - [ ] Nodes clustering
 - [ ] Data synchronization between nodes
   - TCP
