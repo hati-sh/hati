@@ -45,6 +45,6 @@ func (s *memoryStorage) Delete(key []byte) {
 	s.store.Delete(string(key))
 }
 
-func (s *memoryStorage) FlushAll() bool {
+func (s *memoryStorage) FlushAll() (bool, error) {
 	return s.store.FlushAll()
 }

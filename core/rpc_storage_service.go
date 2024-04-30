@@ -105,7 +105,12 @@ func (s *RpcStorageService) FlushAll(args *FlushAllArgs, reply *bool) error {
 		return err
 	}
 
-	*reply = s.storageManager.FlushAll(args.Type)
+	res, err := s.storageManager.FlushAll(args.Type)
+	if err != nil {
+		return err
+	}
+
+	*reply = res
 
 	return nil
 }

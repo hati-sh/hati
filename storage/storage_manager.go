@@ -122,13 +122,13 @@ func (s *Manager) Delete(storageType Type, key []byte) bool {
 	}
 }
 
-func (s *Manager) FlushAll(storageType Type) bool {
+func (s *Manager) FlushAll(storageType Type) (bool, error) {
 	switch storageType {
 	case Memory:
 		return s.memory.FlushAll()
 	case Hdd:
 		return s.hdd.FlushAll()
 	default:
-		return false
+		return false, errors.New("INVALID_STORAGE_TYPE")
 	}
 }

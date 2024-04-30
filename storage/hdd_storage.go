@@ -35,9 +35,7 @@ func (s *hddStorage) Has(key []byte) bool {
 }
 
 func (s *hddStorage) Set(key []byte, value []byte) bool {
-	s.store.Set(string(key), value)
-
-	return true
+	return s.store.Set(string(key), value)
 }
 
 func (s *hddStorage) Get(key []byte) ([]byte, error) {
@@ -49,10 +47,10 @@ func (s *hddStorage) Get(key []byte) ([]byte, error) {
 	return value, nil
 }
 
-func (s *hddStorage) Delete(key []byte) {
-	s.store.Delete(string(key))
+func (s *hddStorage) Delete(key []byte) bool {
+	return s.store.Delete(string(key))
 }
 
-func (s *hddStorage) FlushAll() bool {
+func (s *hddStorage) FlushAll() (bool, error) {
 	return s.store.FlushAll()
 }
