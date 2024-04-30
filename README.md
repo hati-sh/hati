@@ -114,7 +114,7 @@ but it gives overall image of what are the plans for the near future.
 - [x] TCP server cancel context for graceful shutdown
 - [x] RPC server cancel context for graceful shutdown
 - [x] Graceful shutdown of HDD storage
-- [ ] Implement TTL
+- [x] Implement TTL
 - [ ] CLI command to export/import backup of persistent storage
 - [ ] Message broker
 - [ ] Command to return server statistics

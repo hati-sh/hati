@@ -34,6 +34,7 @@ func (s *Manager) Start() {
 	s.Add(1)
 
 	s.memory.Start()
+	s.hdd.Start()
 
 	go func(sm *Manager) {
 		select {

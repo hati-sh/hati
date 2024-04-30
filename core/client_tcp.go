@@ -76,7 +76,7 @@ func (s ClientTcp) Connect() error {
 			timeStart := time.Now()
 			for i := 0; i < 10000; i++ {
 				key := uuid.New()
-				_, err := writer.Write([]byte("SET memory 10000 " + key.String() + " value1 dziala " + key.String() + "\n"))
+				_, err := writer.Write([]byte("SET hdd 10000 " + key.String() + " value1 dziala " + key.String() + "\n"))
 				//_, err := writer.Write([]byte("COUNT hdd\n"))
 				//_, err := writer.Write([]byte("FLUSHALL hdd\n"))
 				if err != nil {

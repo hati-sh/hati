@@ -37,6 +37,12 @@ func newHddShardMap(size int, dataDir string) HddShardMap {
 		if err != nil {
 			panic(err)
 		}
+
+		iter := m[i].db.NewIterator(nil, nil)
+		for iter.Next() {
+			m[i].counter++
+		}
+		iter.Release()
 	}
 
 	return m
