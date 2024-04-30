@@ -48,6 +48,8 @@ func NewHati(ctx context.Context, config *Config) *Hati {
 func (h *Hati) Start() error {
 	var err error
 
+	h.storageManager.Start()
+
 	if err = h.tcpServer.Start(); err != nil {
 		return err
 	}
@@ -65,6 +67,7 @@ func (h *Hati) Stop() {
 	h.stopCtxCancel()
 
 	h.tcpServer.WaitForStop()
+	h.storageManager.WaitForStop()
 
 	h.stopWg.Wait()
 }

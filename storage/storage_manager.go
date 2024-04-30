@@ -3,6 +3,9 @@ package storage
 import (
 	"context"
 	"errors"
+	"github.com/hati-sh/hati/common/logger"
+	"strconv"
+	"sync"
 )
 
 // StorageManager is responsible for managing storages
@@ -11,17 +14,54 @@ type Manager struct {
 	ctx    context.Context
 	memory *memoryStorage
 	hdd    *hddStorage
+	sync.WaitGroup
+	stopChan chan bool
 }
 
 func NewStorageManager(ctx context.Context, dataDir string) *Manager {
 	sm := &Manager{
-		ctx: ctx,
+		ctx:      ctx,
+		stopChan: make(chan bool),
 	}
 
 	sm.memory = NewMemoryStorage(sm.ctx)
 	sm.hdd = NewHddStorage(sm.ctx, dataDir)
 
 	return sm
+}
+
+func (s *Manager) Start() {
+	s.Add(1)
+
+	s.memory.Start()
+	s.hdd.Start()
+
+	go func(sm *Manager) {
+		select {
+		case <-sm.ctx.Done():
+			break
+		case <-sm.stopChan:
+			break
+		}
+
+		sm.hdd.Stop()
+		sm.memory.Stop()
+		sm.Done()
+	}(s)
+}
+
+func (s *Manager) Stop() error {
+	s.stopChan <- true
+	s.Wait()
+
+	logger.Debug("storage manager stopped")
+
+	return nil
+}
+
+func (s *Manager) WaitForStop() {
+	s.Wait()
+	logger.Debug("storage manager stopped")
 }
 
 func (s *Manager) Count(storageType Type) (int, error) {
@@ -35,10 +75,12 @@ func (s *Manager) Count(storageType Type) (int, error) {
 	return 0, nil
 }
 
-func (s *Manager) Set(storageType Type, key []byte, value []byte) error {
-	if storageType == Memory && s.memory.Set(key, value) {
+func (s *Manager) Set(storageType Type, key []byte, value []byte, ttlValue []byte) error {
+	ttl, _ := strconv.ParseInt(string(ttlValue), 10, 64)
+
+	if storageType == Memory && s.memory.Set(key, value, ttl) {
 		return nil
-	} else if storageType == Hdd && s.hdd.Set(key, value) {
+	} else if storageType == Hdd && s.hdd.Set(key, value, ttl) {
 		return nil
 	}
 
@@ -88,13 +130,13 @@ func (s *Manager) Delete(storageType Type, key []byte) bool {
 	}
 }
 
-func (s *Manager) FlushAll(storageType Type) bool {
+func (s *Manager) FlushAll(storageType Type) (bool, error) {
 	switch storageType {
 	case Memory:
 		return s.memory.FlushAll()
 	case Hdd:
 		return s.hdd.FlushAll()
 	default:
-		return false
+		return false, errors.New("INVALID_STORAGE_TYPE")
 	}
 }

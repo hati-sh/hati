@@ -1,6 +1,6 @@
 package common
 
-const VERSION = "0.2.0-dev"
+const VERSION = "0.3.0-dev"
 
 const DEFAULT_DATA_DIR = "./data"
 const DEFAULT_TCP_BIND_HOST = "0.0.0.0"
@@ -9,4 +9,6 @@ const DEFAULT_RPC_BIND_HOST = "0.0.0.0"
 const DEFAULT_RPC_BIND_PORT = "6767"
 
 const TCP_PAYLOAD_HANDLER_CHAN_SIZE = 2000000
+const TCP_READ_BUFFER_INIT = 1024 * 1024 * 8
+const TCP_READ_BUFFER_MAX = 1024 * 1024 * 512
 const STORAGE_DEFAULT_NUMBER_OF_SHARDS = 8

@@ -1,4 +1,4 @@
-# @hatish/hati
+# Hati
 
 `v0.2.0-dev`
 
@@ -47,7 +47,7 @@ While starting Hati `hati start` there are configurational flags available to be
 - `--tcp-port` - bind port for TCP server, default value is `4242`
 - `--rpc` - indicates if should start JSON-RPC server, by default it is off
 - `--rpc-host` - bind host for JSON-RPC server, default `0.0.0.0`
-- `--rpc-port` - bind port for JSON-RPC server, default `6666`
+- `--rpc-port` - bind port for JSON-RPC server, default `6767`
 - `--data-dir` - absolute path to directory where Hati can store files, default `/current/path/to-hati/data`
 - `--cpu-num` - number of CPU cores which should be used by Hati, by default it will set for as many as available
 
@@ -104,9 +104,17 @@ but it gives overall image of what are the plans for the near future.
 
 **v1.0.0**
 
-- [ ] Rpc server cancel context for graceful shutdown
-- [ ] Graceful shutdown of LevelDB
-- [ ] Implement TTL
+- [x] Configuration options via CLI flags
+- [x] Memory and persistent (LevelDB) key-value storage
+- [X] TCP server
+- [x] JSON-RPC server 
+- [x] TCP and JSON-RPC commands:
+  - [x] `SET`, `GET`, `HAS`, `DELETE`, `FLUSHALL`, `COUNT`
+  - [ ] `CREATEROUTER`, `CREATEQUEUE`, `PUBLISH`, `ACK`, `GETROUTER`, `GETQUEUE`, `LISTROUTER`, `LISTQUEUE`, `FLUSH`
+- [x] TCP server cancel context for graceful shutdown
+- [x] RPC server cancel context for graceful shutdown
+- [x] Graceful shutdown of HDD storage
+- [x] Implement TTL
 - [ ] CLI command to export/import backup of persistent storage
 - [ ] Message broker
 - [ ] Command to return server statistics
@@ -114,6 +122,7 @@ but it gives overall image of what are the plans for the near future.
   - Number of keys in each shard
   - Active TCP connections
   - Message broker statistics
+- [ ] Communication via UNIX socket
 - [ ] Access protected by credentials
 
 **v1.1.0**

@@ -5,14 +5,24 @@ import (
 	"errors"
 	"github.com/hati-sh/hati/common/logger"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/opt"
+	"os"
 	"path"
 	"strconv"
+	"sync"
 )
 
 type HddShardMap []*HddShard
 
 type HddShard struct {
-	db *leveldb.DB
+	db      *leveldb.DB
+	dataDir string
+	counter int
+	sync.RWMutex
+}
+
+var hddWriteOptions = &opt.Options{
+	WriteBuffer: 1024 * 1024 * 16,
 }
 
 func newHddShardMap(size int, dataDir string) HddShardMap {
@@ -20,13 +30,19 @@ func newHddShardMap(size int, dataDir string) HddShardMap {
 	m := make([]*HddShard, size)
 
 	for i := 0; i < size; i++ {
-		m[i] = &HddShard{db: nil}
+		m[i] = &HddShard{db: nil, dataDir: dataDir}
 
 		dbPath := path.Join(dataDir, "db", "kv_shard_"+strconv.Itoa(i))
-		m[i].db, err = leveldb.OpenFile(dbPath, nil)
+		m[i].db, err = leveldb.OpenFile(dbPath, hddWriteOptions)
 		if err != nil {
 			panic(err)
 		}
+
+		iter := m[i].db.NewIterator(nil, nil)
+		for iter.Next() {
+			m[i].counter++
+		}
+		iter.Release()
 	}
 
 	return m
@@ -75,59 +91,76 @@ func (m HddShardMap) Has(key string) bool {
 	return true
 }
 
-func (m HddShardMap) Set(key string, value []byte) {
+func (m HddShardMap) Set(key string, value []byte) bool {
 	shard := m.GetShard(key)
+
+	_, err := shard.db.Get([]byte(key), nil)
+	if err != nil {
+		if errors.Is(err, leveldb.ErrNotFound) {
+			shard.Lock()
+			shard.counter++
+			shard.Unlock()
+		}
+	}
 
 	if err := shard.db.Put([]byte(key), value, nil); err != nil {
 		logger.Error(err.Error())
+		return false
 	}
+	return true
 }
 
-func (m HddShardMap) Delete(key string) {
+func (m HddShardMap) Delete(key string) bool {
 	shard := m.GetShard(key)
 	if err := shard.db.Delete([]byte(key), nil); err != nil {
 		if errors.Is(err, leveldb.ErrNotFound) {
-			return
+			return false
 		}
 
 		logger.Error(err.Error())
+		return false
 	}
-}
 
-func (m HddShardMap) FlushAll() bool {
-	// go shard by shard and delete data
-	for _, shard := range m {
-		iter := shard.db.NewIterator(nil, nil)
-		for iter.Next() {
-			key := iter.Key()
-
-			if err := shard.db.Delete(key, nil); err != nil {
-				if errors.Is(err, leveldb.ErrNotFound) {
-					continue
-				}
-
-				logger.Error(err.Error())
-				break
-			}
-		}
-		iter.Release()
-
-		if err := iter.Error(); err != nil {
-			logger.Error(err.Error())
-			return false
-		}
+	if shard.counter > 0 {
+		shard.Lock()
+		shard.counter--
+		shard.Unlock()
 	}
 
 	return true
 }
 
+func (m HddShardMap) FlushAll() (bool, error) {
+	// go shard by shard and delete data
+	for i, shard := range m {
+		m[i].Lock()
+		_ = shard.db.Close()
+
+		dbPath := path.Join(shard.dataDir, "db", "kv_shard_"+strconv.Itoa(i))
+		err := os.RemoveAll(dbPath)
+		if err != nil {
+			logger.Error(err.Error())
+			return false, err
+		}
+		m[i].counter = 0
+
+		m[i].db, err = leveldb.OpenFile(dbPath, hddWriteOptions)
+		if err != nil {
+			panic(err)
+		}
+
+		m[i].Unlock()
+	}
+
+	return true, nil
+}
+
 func (m HddShardMap) CountKeys() int {
 	var keysCount = 0
 	for _, shard := range m {
-		iter := shard.db.NewIterator(nil, nil)
-		for iter.Next() {
-			keysCount++
-		}
+		shard.RLock()
+		keysCount = keysCount + shard.counter
+		shard.RUnlock()
 	}
 
 	return keysCount

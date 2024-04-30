@@ -17,6 +17,7 @@ type SetArgs struct {
 	Type  storage.Type `json:"type"`
 	Key   string       `json:"key"`
 	Value string       `json:"value"`
+	Ttl   string       `json:"ttl"`
 }
 
 type GetArgs struct {
@@ -53,8 +54,7 @@ func (s *RpcStorageService) Set(args *SetArgs, reply *bool) error {
 		return errors.New("invalid key")
 	}
 
-	// Fill reply pointer to send the data back
-	if err := s.storageManager.Set(args.Type, []byte(args.Key), []byte(args.Value)); err != nil {
+	if err := s.storageManager.Set(args.Type, []byte(args.Key), []byte(args.Value), []byte(args.Ttl)); err != nil {
 		*reply = false
 
 		return nil
@@ -105,7 +105,12 @@ func (s *RpcStorageService) FlushAll(args *FlushAllArgs, reply *bool) error {
 		return err
 	}
 
-	*reply = s.storageManager.FlushAll(args.Type)
+	res, err := s.storageManager.FlushAll(args.Type)
+	if err != nil {
+		return err
+	}
+
+	*reply = res
 
 	return nil
 }

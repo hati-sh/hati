@@ -7,7 +7,8 @@ import (
 
 type MemoryShard struct {
 	sync.RWMutex
-	m map[string][]byte
+	m       map[string][]byte
+	counter int
 }
 
 type MemoryShardMap []*MemoryShard
@@ -51,6 +52,11 @@ func (m MemoryShardMap) Set(key string, val []byte) {
 	shard := m.GetShard(key)
 	shard.Lock()
 	defer shard.Unlock()
+
+	has := shard.m[key] != nil
+	if !has {
+		shard.counter++
+	}
 	shard.m[key] = val
 }
 
@@ -60,24 +66,29 @@ func (m MemoryShardMap) Delete(key string) {
 	defer shard.Unlock()
 
 	delete(shard.m, key)
+
+	if shard.counter > 0 {
+		shard.counter--
+	}
 }
 
-func (m MemoryShardMap) FlushAll() bool {
+func (m MemoryShardMap) FlushAll() (bool, error) {
 	// go shard by shard and delete data
 	for _, shard := range m {
 		shard.Lock()
 		shard.m = make(map[string][]byte)
+		shard.counter = 0
 		shard.Unlock()
 	}
 
-	return true
+	return true, nil
 }
 
 func (m MemoryShardMap) CountKeys() int {
 	var keysCount = 0
 	for _, sm := range m {
 		sm.RLock()
-		keysCount = keysCount + len(sm.m)
+		keysCount = keysCount + sm.counter
 		sm.RUnlock()
 	}
 	return keysCount
