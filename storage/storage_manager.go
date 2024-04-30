@@ -3,6 +3,8 @@ package storage
 import (
 	"context"
 	"errors"
+	"github.com/hati-sh/hati/common/logger"
+	"sync"
 )
 
 // StorageManager is responsible for managing storages
@@ -11,17 +13,49 @@ type Manager struct {
 	ctx    context.Context
 	memory *memoryStorage
 	hdd    *hddStorage
+	sync.WaitGroup
+	stopChan chan bool
 }
 
 func NewStorageManager(ctx context.Context, dataDir string) *Manager {
 	sm := &Manager{
-		ctx: ctx,
+		ctx:      ctx,
+		stopChan: make(chan bool),
 	}
 
 	sm.memory = NewMemoryStorage(sm.ctx)
 	sm.hdd = NewHddStorage(sm.ctx, dataDir)
 
 	return sm
+}
+
+func (s *Manager) Start() {
+	s.Add(1)
+	go func(sm *Manager) {
+		select {
+		case <-sm.ctx.Done():
+			s.hdd.Stop()
+			break
+		case <-sm.stopChan:
+			s.hdd.Stop()
+			break
+		}
+		sm.Done()
+	}(s)
+}
+
+func (s *Manager) Stop() error {
+	s.stopChan <- true
+	s.Wait()
+
+	logger.Debug("storage manager stopped")
+
+	return nil
+}
+
+func (s *Manager) WaitForStop() {
+	s.Wait()
+	logger.Debug("storage manager stopped")
 }
 
 func (s *Manager) Count(storageType Type) (int, error) {

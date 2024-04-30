@@ -113,7 +113,7 @@ but it gives overall image of what are the plans for the near future.
   - [ ] `CREATEROUTER`, `CREATEQUEUE`, `PUBLISH`, `ACK`, `GETROUTER`, `GETQUEUE`, `LISTROUTER`, `LISTQUEUE`, `FLUSH`
 - [x] TCP server cancel context for graceful shutdown
 - [x] RPC server cancel context for graceful shutdown
-- [ ] Graceful shutdown of HDD storage
+- [x] Graceful shutdown of HDD storage
 - [ ] Implement TTL
 - [ ] CLI command to export/import backup of persistent storage
 - [ ] Message broker

@@ -17,6 +17,15 @@ func NewHddStorage(ctx context.Context, dataDir string) *hddStorage {
 	}
 }
 
+func (s *hddStorage) Stop() error {
+	for _, shard := range s.store {
+		if err := shard.db.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *hddStorage) CountKeys() int {
 	return s.store.CountKeys()
 }
