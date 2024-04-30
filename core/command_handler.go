@@ -46,15 +46,15 @@ func (ch *CommandHandler) processPayload(payload []byte) ([]byte, error) {
 func (ch *CommandHandler) set(payloadArr [][]byte) ([]byte, error) {
 	storageType := storage.Type(payloadArr[1])
 
-	//ttl := payloadArr[2]
 	if len(payloadArr) < 5 {
 		return nil, errors.New(string(CmdErr))
 	}
 
 	key := payloadArr[3]
+	ttl := payloadArr[2]
 	value := bytes.Join(payloadArr[4:], []byte(" "))
 
-	if err := ch.storageManager.Set(storageType, key, value); err != nil {
+	if err := ch.storageManager.Set(storageType, key, value, ttl); err != nil {
 		return nil, err
 	}
 

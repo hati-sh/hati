@@ -2,20 +2,31 @@ package storage
 
 import (
 	"context"
-
 	"github.com/hati-sh/hati/common"
 )
 
 type memoryStorage struct {
 	ctx   context.Context
 	store MemoryShardMap
+	ttlGc *memoryStorageTtlGc
 }
 
 func NewMemoryStorage(ctx context.Context) *memoryStorage {
-	return &memoryStorage{
+	ms := &memoryStorage{
 		ctx:   ctx,
 		store: newMemoryShardMap(common.STORAGE_DEFAULT_NUMBER_OF_SHARDS),
 	}
+	ms.ttlGc = NewMemoryStorageTtlGc(ms)
+
+	return ms
+}
+
+func (s *memoryStorage) Start() {
+	s.ttlGc.Start()
+}
+
+func (s *memoryStorage) Stop() {
+	s.ttlGc.Stop()
 }
 
 func (s *memoryStorage) CountKeys() int {
@@ -26,8 +37,12 @@ func (s *memoryStorage) Has(key []byte) bool {
 	return s.store.Has(string(key))
 }
 
-func (s *memoryStorage) Set(key []byte, value []byte) bool {
+func (s *memoryStorage) Set(key []byte, value []byte, ttl int64) bool {
 	s.store.Set(string(key), value)
+
+	if ttl > 0 {
+		s.ttlGc.SetTtl(ttl, key)
+	}
 
 	return true
 }

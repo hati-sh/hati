@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/hati-sh/hati/common/logger"
+	"strconv"
 	"sync"
 )
 
@@ -31,15 +32,19 @@ func NewStorageManager(ctx context.Context, dataDir string) *Manager {
 
 func (s *Manager) Start() {
 	s.Add(1)
+
+	s.memory.Start()
+
 	go func(sm *Manager) {
 		select {
 		case <-sm.ctx.Done():
-			s.hdd.Stop()
 			break
 		case <-sm.stopChan:
-			s.hdd.Stop()
 			break
 		}
+
+		sm.hdd.Stop()
+		sm.memory.Stop()
 		sm.Done()
 	}(s)
 }
@@ -69,10 +74,12 @@ func (s *Manager) Count(storageType Type) (int, error) {
 	return 0, nil
 }
 
-func (s *Manager) Set(storageType Type, key []byte, value []byte) error {
-	if storageType == Memory && s.memory.Set(key, value) {
+func (s *Manager) Set(storageType Type, key []byte, value []byte, ttlValue []byte) error {
+	ttl, _ := strconv.ParseInt(string(ttlValue), 10, 64)
+
+	if storageType == Memory && s.memory.Set(key, value, ttl) {
 		return nil
-	} else if storageType == Hdd && s.hdd.Set(key, value) {
+	} else if storageType == Hdd && s.hdd.Set(key, value, ttl) {
 		return nil
 	}
 

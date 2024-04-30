@@ -34,7 +34,7 @@ func (s *hddStorage) Has(key []byte) bool {
 	return s.store.Has(string(key))
 }
 
-func (s *hddStorage) Set(key []byte, value []byte) bool {
+func (s *hddStorage) Set(key []byte, value []byte, ttl int64) bool {
 	return s.store.Set(string(key), value)
 }
 
