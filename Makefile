@@ -16,7 +16,7 @@ dev:
 .PHONY: dev-client
 dev-client:
 	@echo "\n> --- run in development mode --"
-	HATI_DEBUG=true HATI_DATA_DIR=./build go run ./cmd/hati/main.go client --tcp-host localhost --tcp-port 4242
+	HATI_DEBUG=true HATI_DATA_DIR=./build go run ./cmd/hati/main.go client --tcp-host viaduct.proxy.rlwy.net --tcp-port 35077
 
 
 .PHONY: hati

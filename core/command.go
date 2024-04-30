@@ -8,6 +8,7 @@ var CmdErr = []byte("+ERR\n")
 var CmdSet = []byte("SET")
 var CmdGet = []byte("GET")
 var CmdHas = []byte("HAS")
+var CmdCount = []byte("COUNT")
 var CmdDelete = []byte("DELETE")
 var CmdFlushAll = []byte("FLUSHALL")
 

@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/hati-sh/hati/common"
 	"log"
 	"net"
@@ -74,10 +73,11 @@ func (s ClientTcp) Connect() error {
 			writer := bufio.NewWriter(conn)
 			rc := 0
 			timeStart := time.Now()
-			for i := 0; i < 100000; i++ {
-				key := uuid.New()
+			for i := 0; i < 1; i++ {
+				//key := uuid.New()
 
-				_, err := writer.Write([]byte("SET hdd 0 " + key.String() + " value1 dziala " + key.String() + "\n"))
+				//_, err := writer.Write([]byte("SET hdd 0 " + key.String() + " value1 dziala " + key.String() + "\n"))
+				_, err := writer.Write([]byte("COUNT hdd\n"))
 				if err != nil {
 					log.Fatalf("client: write: %s", err)
 				}
@@ -94,7 +94,7 @@ func (s ClientTcp) Connect() error {
 				if n > 0 {
 					rc++
 				}
-				// log.Printf("client: read %q (%d bytes)", string(reply[:n]), n)
+				log.Printf("client: read %q (%d bytes)", string(reply[:n]), n)
 				// log.Print("client: exiting")
 			}
 			timeEnd := time.Now()
