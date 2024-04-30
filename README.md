@@ -59,8 +59,6 @@ While starting Hati `hati start` there are configurational flags available to be
 
 Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to zero `0` which means that value will be stored on the hard-drive. Ttl value is in ms, if higher than `0` Hati can guarantee that value will be stored at minimum for provided ttl value and will be removed from the storage shortly (as soon as possible) after that.
 
-**^^ TTL IS NOT IMPLEMENTED YET BUT HAVE TO BE INCLUDED IN THE COMMAND - IT JUST HAVE NO EFFECT AS OF THIS MOMENT^^**
-
 `HAS <type> <key>\n` - check if provided key exist in given storage type
 
 `GET <type> <key>\n` - get value for provided key in given storage type
