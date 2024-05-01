@@ -1,7 +1,9 @@
 package broker
 
 import (
+	"bytes"
 	"context"
+	"encoding/gob"
 	"errors"
 	"github.com/hati-sh/hati/common"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -54,12 +56,21 @@ func New(ctx context.Context, dataDir string) (*Broker, error) {
 	return brokerInstance, nil
 }
 
-func (b *Broker) Start() {}
+func (b *Broker) Start() error {
+	if err := b.loadRoutersFromDatabase(); err != nil {
+		return err
+	}
 
-func (b *Broker) Stop() {}
+	return nil
+}
+
+func (b *Broker) Stop() {
+	_ = b.routerDb.Close()
+	_ = b.queueDb.Close()
+}
 
 func (b *Broker) CreateRouter(config RouterConfig) error {
-	if b.router[config.name] != nil {
+	if b.router[config.Name] != nil {
 		return ErrRouterExist
 	}
 
@@ -68,19 +79,19 @@ func (b *Broker) CreateRouter(config RouterConfig) error {
 		return err
 	}
 
-	if err = b.routerDb.Put([]byte(config.name), valueBytes, nil); err != nil {
+	if err = b.routerDb.Put([]byte(config.Name), valueBytes, nil); err != nil {
 		return err
 	}
 
 	b.routerLock.Lock()
 	defer b.routerLock.Unlock()
-	b.router[config.name] = NewRouter(b.ctx, config)
+	b.router[config.Name] = NewRouter(b.ctx, config)
 
 	return nil
 }
 
 func (b *Broker) CreateQueue(config QueueConfig) error {
-	if b.queue[config.name] != nil {
+	if b.queue[config.Name] != nil {
 		return ErrQueueExist
 	}
 
@@ -89,14 +100,37 @@ func (b *Broker) CreateQueue(config QueueConfig) error {
 		return err
 	}
 
-	if err = b.queueDb.Put([]byte(config.name), valueBytes, nil); err != nil {
+	if err = b.queueDb.Put([]byte(config.Name), valueBytes, nil); err != nil {
 		return err
 	}
 
 	b.queueLock.Lock()
 	defer b.queueLock.Unlock()
 
-	b.queue[config.name] = NewQueue(b.ctx, config)
+	b.queue[config.Name] = NewQueue(b.ctx, config)
 
+	return nil
+}
+
+func (b *Broker) loadRoutersFromDatabase() error {
+	iter := b.routerDb.NewIterator(nil, nil)
+	for iter.Next() {
+		key := iter.Key()
+		value := iter.Value()
+
+		routerConfig := RouterConfig{}
+		dec := gob.NewDecoder(bytes.NewReader(value))
+		err := dec.Decode(&routerConfig)
+		if err != nil {
+			return err
+		}
+
+		b.router[string(key)] = NewRouter(b.ctx, routerConfig)
+	}
+	iter.Release()
+
+	if err := iter.Error(); err != nil {
+		return err
+	}
 	return nil
 }

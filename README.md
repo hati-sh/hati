@@ -115,6 +115,8 @@ but it gives overall image of what are the plans for the near future.
 - [x] Implement TTL
 - [ ] CLI command to export/import backup of persistent storage
 - [ ] Message broker
+  - [ ] Routers management
+  - [ ] Queues management
 - [ ] Command to return server statistics
   - Number of keys for each storage type
   - Number of keys in each shard

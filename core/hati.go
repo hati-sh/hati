@@ -55,6 +55,10 @@ func (h *Hati) Start() error {
 
 	h.storageManager.Start()
 
+	if err = h.broker.Start(); err != nil {
+		return err
+	}
+
 	if err = h.tcpServer.Start(); err != nil {
 		return err
 	}
@@ -71,6 +75,7 @@ func (h *Hati) Start() error {
 func (h *Hati) Stop() {
 	h.stopCtxCancel()
 
+	h.broker.Stop()
 	h.tcpServer.WaitForStop()
 	h.storageManager.WaitForStop()
 

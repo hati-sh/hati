@@ -40,6 +40,7 @@ func newHddShardMap(size int, dataDir string) HddShardMap {
 		for iter.Next() {
 			m[i].counter++
 		}
+		m[i].Unlock()
 		iter.Release()
 	}
 
@@ -91,14 +92,17 @@ func (m HddShardMap) Has(key string) bool {
 
 func (m HddShardMap) Set(key string, value []byte) bool {
 	shard := m.GetShard(key)
-
 	_, err := shard.db.Get([]byte(key), nil)
 	if err != nil {
 		if errors.Is(err, leveldb.ErrNotFound) {
 			shard.Lock()
 			shard.counter++
 			shard.Unlock()
+		} else {
+			logger.Error(err.Error())
+			return false
 		}
+
 	}
 
 	if err := shard.db.Put([]byte(key), value, nil); err != nil {
