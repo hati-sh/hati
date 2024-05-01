@@ -30,7 +30,7 @@ func newHddShardMap(size int, dataDir string) HddShardMap {
 
 	for i := 0; i < size; i++ {
 		m[i] = &HddShard{db: nil, dataDir: dataDir}
-
+		m[i].Lock()
 		m[i].db, err = common.OpenDatabase(dataDir, "kv_shard_"+strconv.Itoa(i), hddWriteOptions)
 		if err != nil {
 			panic(err)
