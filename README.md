@@ -136,3 +136,42 @@ but it gives overall image of what are the plans for the near future.
 - [ ] Data synchronization between nodes
   - TCP
   - P2P (? - TBD)
+
+---
+
+## Benchmark
+
+### Memory Storage
+
+```shell
+goos: darwin
+goarch: amd64
+pkg: github.com/hati-sh/hati/storage
+cpu: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+BenchmarkMemoryStorage_Set_Ttl0
+BenchmarkMemoryStorage_Set_Ttl0-8                 280068              4034 ns/op           0.25 MB/s         487 B/op          8 allocs/op
+BenchmarkMemoryStorage_Set_Ttl0_P100
+BenchmarkMemoryStorage_Set_Ttl0_P100-8            764068              1533 ns/op           0.65 MB/s         517 B/op          8 allocs/op
+BenchmarkMemoryStorage_Set_Ttl10
+BenchmarkMemoryStorage_Set_Ttl10-8                257722              4645 ns/op           0.22 MB/s         487 B/op         10 allocs/op
+BenchmarkMemoryStorage_Set_Ttl10_P100
+BenchmarkMemoryStorage_Set_Ttl10_P100-8           617840              1998 ns/op           0.50 MB/s         474 B/op         10 allocs/op
+BenchmarkMemoryStorage_Get
+BenchmarkMemoryStorage_Get-8                     2957624               404.3 ns/op         2.47 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_Get_P100
+BenchmarkMemoryStorage_Get_P100-8               14491522                93.62 ns/op       10.68 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_Has
+BenchmarkMemoryStorage_Has-8                     3085176               383.7 ns/op         2.61 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_Has_P100
+BenchmarkMemoryStorage_Has_P100-8               14619558                92.84 ns/op       10.77 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_CountKeys
+BenchmarkMemoryStorage_CountKeys-8              11722152               102.3 ns/op         9.78 MB/s           0 B/op          0 allocs/op
+BenchmarkMemoryStorage_CountKeys_P100
+BenchmarkMemoryStorage_CountKeys_P100-8          7119814               172.8 ns/op         5.79 MB/s           0 B/op          0 allocs/op
+BenchmarkMemoryStorage_Delete
+BenchmarkMemoryStorage_Delete-8                  2376961               495.5 ns/op         2.02 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_Delete_P100
+BenchmarkMemoryStorage_Delete_P100-8             9073515               140.1 ns/op         7.14 MB/s          96 B/op          2 allocs/op
+PASS
+ok      github.com/hati-sh/hati/storage 18.217s
+```

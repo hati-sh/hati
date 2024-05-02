@@ -29,14 +29,14 @@ func init() {
 	}
 }
 
-func TestNewMemoryStorageCreation(t *testing.T) {
+func TestNewMemoryStorage_New(t *testing.T) {
 	s := NewMemoryStorage(context.TODO())
 	if s == nil {
 		t.Errorf("NewMemoryStorage returned nil")
 	}
 }
 
-func TestSet(t *testing.T) {
+func TestMemoryStorage_Set(t *testing.T) {
 	id := uuid.New()
 	value := []byte(uuid.New().String())
 
@@ -46,7 +46,7 @@ func TestSet(t *testing.T) {
 
 }
 
-func TestGet(t *testing.T) {
+func TestMemoryStorage_Get(t *testing.T) {
 	id := uuid.New()
 	value := []byte(uuid.New().String())
 	key := []byte(id.String())
@@ -62,6 +62,38 @@ func TestGet(t *testing.T) {
 
 	if string(resValue) != string(value) {
 		t.Errorf("Get returned wrong value")
+	}
+}
+
+func TestMemoryStorage_Has(t *testing.T) {
+	id := uuid.New()
+	value := []byte(uuid.New().String())
+	key := []byte(id.String())
+
+	if ok := storage.Set(key, value, 0); !ok {
+		t.Errorf("Set returned false")
+	}
+
+	if ok := storage.Has(key); !ok {
+		t.Errorf("Has returned false")
+	}
+}
+
+func TestMemoryStorage_Delete(t *testing.T) {
+	id := uuid.New()
+	value := []byte(uuid.New().String())
+	key := []byte(id.String())
+
+	if ok := storage.Set(key, value, 0); !ok {
+		t.Errorf("Set returned false")
+	}
+
+	storage.Delete(key)
+}
+
+func TestMemoryStorage_Count(t *testing.T) {
+	if count := storage.CountKeys(); count < 1 {
+		t.Errorf("CountKeys returned 0 keys")
 	}
 }
 
@@ -129,7 +161,7 @@ func BenchmarkMemoryStorage_Set_Ttl10_P100(b *testing.B) {
 	})
 }
 
-func BenchmarkMemoryStorage_Get_Ttl0(b *testing.B) {
+func BenchmarkMemoryStorage_Get(b *testing.B) {
 	b.SetBytes(1)
 	b.ReportAllocs()
 
@@ -142,7 +174,7 @@ func BenchmarkMemoryStorage_Get_Ttl0(b *testing.B) {
 	}
 }
 
-func BenchmarkMemoryStorage_Get_Ttl0_P100(b *testing.B) {
+func BenchmarkMemoryStorage_Get_P100(b *testing.B) {
 	b.SetBytes(1)
 	b.ReportAllocs()
 	b.SetParallelism(100)
@@ -153,6 +185,81 @@ func BenchmarkMemoryStorage_Get_Ttl0_P100(b *testing.B) {
 			if err != nil {
 				b.Errorf("Get returned error %v", err)
 			}
+		}
+	})
+}
+
+func BenchmarkMemoryStorage_Has(b *testing.B) {
+	b.SetBytes(1)
+	b.ReportAllocs()
+
+	i := 0
+	for ; i < b.N; i++ {
+		if ok := storage.Has(insertedKeys[randInt(0, 9999)]); !ok {
+			b.Errorf("Has returned false")
+		}
+	}
+}
+
+func BenchmarkMemoryStorage_Has_P100(b *testing.B) {
+	b.SetBytes(1)
+	b.ReportAllocs()
+	b.SetParallelism(100)
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			if ok := storage.Has(insertedKeys[randInt(0, 9999)]); !ok {
+				b.Errorf("Has returned false")
+			}
+		}
+	})
+}
+
+func BenchmarkMemoryStorage_CountKeys(b *testing.B) {
+	b.SetBytes(1)
+	b.ReportAllocs()
+
+	i := 0
+	for ; i < b.N; i++ {
+		if count := storage.CountKeys(); count < 1 {
+			b.Errorf("CountKeys returned 0 keys")
+		}
+	}
+}
+
+func BenchmarkMemoryStorage_CountKeys_P100(b *testing.B) {
+	b.SetBytes(1)
+	b.ReportAllocs()
+	b.SetParallelism(100)
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			if count := storage.CountKeys(); count < 1 {
+				b.Errorf("CountKeys returned 0 keys")
+			}
+		}
+	})
+}
+
+func BenchmarkMemoryStorage_Delete(b *testing.B) {
+	b.SetBytes(1)
+	b.ReportAllocs()
+
+	i := 0
+	for ; i < b.N; i++ {
+		storage.Delete(insertedKeys[randInt(0, 9999)])
+	}
+}
+
+func BenchmarkMemoryStorage_Delete_P100(b *testing.B) {
+	b.SetBytes(1)
+	b.ReportAllocs()
+
+	b.SetParallelism(100)
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			storage.Delete(insertedKeys[randInt(0, 9999)])
 		}
 	})
 }
