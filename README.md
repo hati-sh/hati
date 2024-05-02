@@ -55,18 +55,34 @@ While starting Hati `hati start` there are configurational flags available to be
 
 ### Key-Value Storage
 
-`SET <type> <ttl> <key> <value>\n` - save key with provided value to the selected storage type.
+- `SET <type> <ttl> <key> <value>\n`<br/>
+  save key with provided value to the selected storage type.<br/><br/>
+  Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to zero `0` which means that value will be stored on the hard-drive. Ttl value is in ms, if higher than `0` Hati can guarantee that value will be stored at minimum for provided ttl value and will be removed from the storage shortly (as soon as possible) after that.
 
-Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to zero `0` which means that value will be stored on the hard-drive. Ttl value is in ms, if higher than `0` Hati can guarantee that value will be stored at minimum for provided ttl value and will be removed from the storage shortly (as soon as possible) after that.
+- `HAS <type> <key>\n`
+  <br/>check if provided key exist in given storage type
 
-`HAS <type> <key>\n` - check if provided key exist in given storage type
+- `GET <type> <key>\n`<br/>
+  get value for provided key in given storage type
 
-`GET <type> <key>\n` - get value for provided key in given storage type
+- `DELETE <type> <key>\n`<br/>
+  get value for provided key in given storage type
 
-`DELETE <type> <key>\n` - get value for provided key in given storage type
+- `FLUSHALL <type>\n`<br/>
+  flush (delete) all data from given storage type
 
-`FLUSHALL <type>\n` - flush (delete) all data from given storage type
+### Message Broker
 
+- `CREATE_ROUTER <name> <type>\n`<br/>
+  Create new router with given name and type: `direct`, `fanout`, `topic`
+- `CREATE_QUEUE <name> <type> <bindings>\n`<br/>
+  Create new queue with given name, type (`memory`, `hdd`) and bindings:<br/>
+  - `<router_name>:<routing_key>,<router_name>:<routing_key>`<br/>
+    eg: `CREATE_QUEUE test-queue hdd core:*.event,emails:user.registered.event\n`
+- `PUBLISH <router_name> <ttl> <msg_name> <payload>\n`<br/>
+  Publish new message to the Router
+
+`<routing_key>` - 
 ## JSON-RPC Methods
 
 **Storage**
@@ -92,7 +108,15 @@ Hati offers two storage types: `memory` and `hdd` . By default `<ttl>` is set to
 
 **Message broker**
 
-- `Broker.`
+- `Broker.CreateRouter`
+- `Broker.CreateQueue`
+- `Broker.Publish`
+- `Broker.Ack`
+- `Broker.GetQueue`
+- `Broker.GetRouter`
+- `Broker.ListRouter`
+- `Broker.ListQueue`
+- `Broker.Purge`
 
 ## To do
 
@@ -108,7 +132,7 @@ but it gives overall image of what are the plans for the near future.
 - [x] JSON-RPC server 
 - [x] TCP and JSON-RPC commands:
   - [x] `SET`, `GET`, `HAS`, `DELETE`, `FLUSHALL`, `COUNT`
-  - [ ] `CREATEROUTER`, `CREATEQUEUE`, `PUBLISH`, `ACK`, `GETROUTER`, `GETQUEUE`, `LISTROUTER`, `LISTQUEUE`, `FLUSH`
+  - [ ] `CREATE_ROUTER`, `CREATE_QUEUE`, `PUBLISH`, `ACK`, `GET_ROUTER`, `GET_QUEUE`, `LIST_ROUTER`, `LIST_QUEUE`, `PURGE`
 - [x] TCP server cancel context for graceful shutdown
 - [x] RPC server cancel context for graceful shutdown
 - [x] Graceful shutdown of HDD storage

@@ -16,7 +16,13 @@ var CmdCreateRouter = []byte("CREATE_ROUTER")
 var CmdCreateQueue = []byte("CREATE_QUEUE")
 
 var CmdPublish = []byte("PUBLISH")
+var CmdPurge = []byte("PURGE")
+var CmdGetRouter = []byte("GET_ROUTER")
+var CmdGetQueue = []byte("GET_QUEUE")
+var CmdListRouter = []byte("LIST_ROUTER")
+var CmdListQueue = []byte("LIST_QUEUE")
 
 var Commands = [][]byte{
-	CmdSet, CmdGet, CmdHas, CmdDelete, CmdCreateRouter, CmdCreateQueue, CmdPublish, CmdFlushAll,
+	CmdSet, CmdGet, CmdHas, CmdDelete, CmdCreateRouter, CmdCreateQueue, CmdPublish, CmdFlushAll, CmdPurge,
+	CmdGetRouter, CmdGetQueue, CmdListRouter, CmdListQueue,
 }
