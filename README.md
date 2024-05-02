@@ -149,29 +149,29 @@ goarch: amd64
 pkg: github.com/hati-sh/hati/storage
 cpu: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
 BenchmarkMemoryStorage_Set_Ttl0
-BenchmarkMemoryStorage_Set_Ttl0-8                 292143              4055 ns/op           0.25 MB/s         480 B/op          8 allocs/op
-BenchmarkMemoryStorage_Set_Ttl0_P100
-BenchmarkMemoryStorage_Set_Ttl0_P100-8            751743              1553 ns/op           0.64 MB/s         520 B/op          8 allocs/op
+BenchmarkMemoryStorage_Set_Ttl0-8                 301227              4042 ns/op           0.25 MB/s         475 B/op          8 allocs/op
+BenchmarkMemoryStorage_Set_Ttl0_P10
+BenchmarkMemoryStorage_Set_Ttl0_P10-8             778269              1563 ns/op           0.64 MB/s         513 B/op          8 allocs/op
 BenchmarkMemoryStorage_Set_Ttl10
-BenchmarkMemoryStorage_Set_Ttl10-8                266694              4763 ns/op           0.21 MB/s         489 B/op         10 allocs/op
-BenchmarkMemoryStorage_Set_Ttl10_P100
-BenchmarkMemoryStorage_Set_Ttl10_P100-8           506427              2181 ns/op           0.46 MB/s         469 B/op         10 allocs/op
+BenchmarkMemoryStorage_Set_Ttl10-8                258073              4694 ns/op           0.21 MB/s         487 B/op         10 allocs/op
+BenchmarkMemoryStorage_Set_Ttl10_P10
+BenchmarkMemoryStorage_Set_Ttl10_P10-8            560163              2080 ns/op           0.48 MB/s         474 B/op         10 allocs/op
 BenchmarkMemoryStorage_Get
-BenchmarkMemoryStorage_Get-8                     2686506               438.0 ns/op         2.28 MB/s          96 B/op          2 allocs/op
-BenchmarkMemoryStorage_Get_P100
-BenchmarkMemoryStorage_Get_P100-8               14420150               107.2 ns/op         9.33 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_Get-8                     2767945               424.8 ns/op         2.35 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_Get_P10
+BenchmarkMemoryStorage_Get_P10-8                14647008                96.80 ns/op       10.33 MB/s          96 B/op          2 allocs/op
 BenchmarkMemoryStorage_Has
-BenchmarkMemoryStorage_Has-8                     2938930               408.3 ns/op         2.45 MB/s          96 B/op          2 allocs/op
-BenchmarkMemoryStorage_Has_P100
-BenchmarkMemoryStorage_Has_P100-8               13023224                93.40 ns/op       10.71 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_Has-8                     3001287               390.1 ns/op         2.56 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_Has_P10
+BenchmarkMemoryStorage_Has_P10-8                15176740                93.13 ns/op       10.74 MB/s          96 B/op          2 allocs/op
 BenchmarkMemoryStorage_CountKeys
-BenchmarkMemoryStorage_CountKeys-8              11597236               106.0 ns/op         9.44 MB/s           0 B/op          0 allocs/op
-BenchmarkMemoryStorage_CountKeys_P100
-BenchmarkMemoryStorage_CountKeys_P100-8          6730882               170.8 ns/op         5.85 MB/s           0 B/op          0 allocs/op
+BenchmarkMemoryStorage_CountKeys-8              11736955               102.4 ns/op         9.76 MB/s           0 B/op          0 allocs/op
+BenchmarkMemoryStorage_CountKeys_P10
+BenchmarkMemoryStorage_CountKeys_P10-8           7081261               170.0 ns/op         5.88 MB/s           0 B/op          0 allocs/op
 BenchmarkMemoryStorage_Delete
-BenchmarkMemoryStorage_Delete-8                  2391238               499.5 ns/op         2.00 MB/s          96 B/op          2 allocs/op
-BenchmarkMemoryStorage_Delete_P100
-BenchmarkMemoryStorage_Delete_P100-8             8513846               136.9 ns/op         7.30 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_Delete-8                  2363782               528.3 ns/op         1.89 MB/s          96 B/op          2 allocs/op
+BenchmarkMemoryStorage_Delete_P10
+BenchmarkMemoryStorage_Delete_P10-8              8787079               146.1 ns/op         6.85 MB/s          96 B/op          2 allocs/op
 PASS
-ok      github.com/hati-sh/hati/storage 19.217s
+ok      github.com/hati-sh/hati/storage 18.722s
 ```
