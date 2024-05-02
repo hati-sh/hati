@@ -61,6 +61,10 @@ func (b *Broker) Start() error {
 		return err
 	}
 
+	if err := b.loadQueuesFromDatabase(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -126,6 +130,29 @@ func (b *Broker) loadRoutersFromDatabase() error {
 		}
 
 		b.router[string(key)] = NewRouter(b.ctx, routerConfig)
+	}
+	iter.Release()
+
+	if err := iter.Error(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (b *Broker) loadQueuesFromDatabase() error {
+	iter := b.queueDb.NewIterator(nil, nil)
+	for iter.Next() {
+		key := iter.Key()
+		value := iter.Value()
+
+		queueConfig := QueueConfig{}
+		dec := gob.NewDecoder(bytes.NewReader(value))
+		err := dec.Decode(&queueConfig)
+		if err != nil {
+			return err
+		}
+
+		b.queue[string(key)] = NewQueue(b.ctx, queueConfig)
 	}
 	iter.Release()
 
