@@ -112,10 +112,10 @@ func BenchmarkMemoryStorage_Set_Ttl0(b *testing.B) {
 	}
 }
 
-func BenchmarkMemoryStorage_Set_Ttl0_P100(b *testing.B) {
+func BenchmarkMemoryStorage_Set_Ttl0_P10(b *testing.B) {
 	b.SetBytes(1)
 	b.ReportAllocs()
-	b.SetParallelism(100)
+	b.SetParallelism(10)
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -144,10 +144,10 @@ func BenchmarkMemoryStorage_Set_Ttl10(b *testing.B) {
 	}
 }
 
-func BenchmarkMemoryStorage_Set_Ttl10_P100(b *testing.B) {
+func BenchmarkMemoryStorage_Set_Ttl10_P10(b *testing.B) {
 	b.SetBytes(1)
 	b.ReportAllocs()
-	b.SetParallelism(100)
+	b.SetParallelism(10)
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -174,10 +174,10 @@ func BenchmarkMemoryStorage_Get(b *testing.B) {
 	}
 }
 
-func BenchmarkMemoryStorage_Get_P100(b *testing.B) {
+func BenchmarkMemoryStorage_Get_P10(b *testing.B) {
 	b.SetBytes(1)
 	b.ReportAllocs()
-	b.SetParallelism(100)
+	b.SetParallelism(10)
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -201,10 +201,10 @@ func BenchmarkMemoryStorage_Has(b *testing.B) {
 	}
 }
 
-func BenchmarkMemoryStorage_Has_P100(b *testing.B) {
+func BenchmarkMemoryStorage_Has_P10(b *testing.B) {
 	b.SetBytes(1)
 	b.ReportAllocs()
-	b.SetParallelism(100)
+	b.SetParallelism(10)
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -227,10 +227,10 @@ func BenchmarkMemoryStorage_CountKeys(b *testing.B) {
 	}
 }
 
-func BenchmarkMemoryStorage_CountKeys_P100(b *testing.B) {
+func BenchmarkMemoryStorage_CountKeys_P10(b *testing.B) {
 	b.SetBytes(1)
 	b.ReportAllocs()
-	b.SetParallelism(100)
+	b.SetParallelism(10)
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -251,11 +251,11 @@ func BenchmarkMemoryStorage_Delete(b *testing.B) {
 	}
 }
 
-func BenchmarkMemoryStorage_Delete_P100(b *testing.B) {
+func BenchmarkMemoryStorage_Delete_P10(b *testing.B) {
 	b.SetBytes(1)
 	b.ReportAllocs()
 
-	b.SetParallelism(100)
+	b.SetParallelism(10)
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
