@@ -1,6 +1,6 @@
 # Hati
 
-`v0.3.0-dev`
+`v0.4.0-dev`
 
 ```
 IN DEVELOPMENT. DO NOT USE IN PRODUCTION.
