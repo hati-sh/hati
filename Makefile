@@ -36,4 +36,7 @@ clean:
 
 .PHONY: test
 test:
+	go test ./... -v
+.PHONY: test-bench
+test-bench:
 	go test ./... -v -bench . -benchmem
