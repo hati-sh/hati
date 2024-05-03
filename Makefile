@@ -30,5 +30,13 @@ hati:
 	@echo "\n> ---"
 	@echo "> Build successful. Executable in: \"$(GOBIN)/hati\" "
 	@echo "> ---\n"
+.PHONY: clean
 clean:
 	rm -rf $(GOBIN)
+
+.PHONY: test
+test:
+	go test ./... -v
+.PHONY: test-bench
+test-bench:
+	go test ./... -v -bench . -benchmem

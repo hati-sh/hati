@@ -31,9 +31,11 @@ func (s *memoryStorageTtlGc) SetTtl(expiresAt int64, key []byte) {
 	expiresAt = time.Now().UnixMilli() + expiresAt
 
 	if s.ttlKeys[expiresAt] == nil {
-		s.ttlKeys[expiresAt] = make([][]byte, 0)
+		s.ttlKeys[expiresAt] = make([][]byte, 1)
+		s.ttlKeys[expiresAt][0] = key
+	} else {
+		s.ttlKeys[expiresAt] = append(s.ttlKeys[expiresAt], key)
 	}
-	s.ttlKeys[expiresAt] = append(s.ttlKeys[expiresAt], key)
 }
 
 func (s *memoryStorageTtlGc) DeleteTtl(expiresAt int64, key []byte) {

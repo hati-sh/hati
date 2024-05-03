@@ -3,11 +3,10 @@ package storage
 import (
 	"crypto/sha1"
 	"errors"
+	"github.com/hati-sh/hati/common"
 	"github.com/hati-sh/hati/common/logger"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/opt"
-	"os"
-	"path"
 	"strconv"
 	"sync"
 )
@@ -22,7 +21,7 @@ type HddShard struct {
 }
 
 var hddWriteOptions = &opt.Options{
-	WriteBuffer: 1024 * 1024 * 16,
+	WriteBuffer: common.STORAGE_HDD_WRITE_BUFFER,
 }
 
 func newHddShardMap(size int, dataDir string) HddShardMap {
@@ -31,9 +30,8 @@ func newHddShardMap(size int, dataDir string) HddShardMap {
 
 	for i := 0; i < size; i++ {
 		m[i] = &HddShard{db: nil, dataDir: dataDir}
-
-		dbPath := path.Join(dataDir, "db", "kv_shard_"+strconv.Itoa(i))
-		m[i].db, err = leveldb.OpenFile(dbPath, hddWriteOptions)
+		m[i].Lock()
+		m[i].db, err = common.OpenDatabase(dataDir, "kv_shard_"+strconv.Itoa(i), hddWriteOptions)
 		if err != nil {
 			panic(err)
 		}
@@ -42,6 +40,7 @@ func newHddShardMap(size int, dataDir string) HddShardMap {
 		for iter.Next() {
 			m[i].counter++
 		}
+		m[i].Unlock()
 		iter.Release()
 	}
 
@@ -93,14 +92,17 @@ func (m HddShardMap) Has(key string) bool {
 
 func (m HddShardMap) Set(key string, value []byte) bool {
 	shard := m.GetShard(key)
-
 	_, err := shard.db.Get([]byte(key), nil)
 	if err != nil {
 		if errors.Is(err, leveldb.ErrNotFound) {
 			shard.Lock()
 			shard.counter++
 			shard.Unlock()
+		} else {
+			logger.Error(err.Error())
+			return false
 		}
+
 	}
 
 	if err := shard.db.Put([]byte(key), value, nil); err != nil {
@@ -136,15 +138,16 @@ func (m HddShardMap) FlushAll() (bool, error) {
 		m[i].Lock()
 		_ = shard.db.Close()
 
-		dbPath := path.Join(shard.dataDir, "db", "kv_shard_"+strconv.Itoa(i))
-		err := os.RemoveAll(dbPath)
-		if err != nil {
+		dbName := "kv_shard_" + strconv.Itoa(i)
+		if err := common.DeleteDatabase(shard.dataDir, dbName); err != nil {
 			logger.Error(err.Error())
 			return false, err
 		}
+
+		var err error
 		m[i].counter = 0
 
-		m[i].db, err = leveldb.OpenFile(dbPath, hddWriteOptions)
+		m[i].db, err = common.OpenDatabase(shard.dataDir, dbName, hddWriteOptions)
 		if err != nil {
 			panic(err)
 		}
